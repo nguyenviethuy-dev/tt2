@@ -59,5 +59,5 @@ const products = [
 
 
 export default function ProductsSection() {
-  return <ProductCarousel title="Products Trending Now" products={products} />
+  return <ProductCarousel title="Products Trending Now" products={products} isLargeScreen={true} />
 }

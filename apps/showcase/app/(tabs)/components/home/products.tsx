@@ -1,4 +1,9 @@
-import ProductCarousel from "./products/product-carousel"
+import { useState } from "react";
+import { View, Text, TouchableOpacity, Image, ScrollView, Modal, Dimensions } from "react-native";
+import { X } from "lucide-react-native";
+import { WebView } from "react-native-webview";
+import { useWindowDimensions } from "react-native";
+import ProductCarousel from "./products/product-carousel";
 
 const products = [
   {
@@ -55,10 +60,16 @@ const products = [
     reviews: 73,
     imageUrl: "https://cdn.shopify.com/s/files/1/0402/7852/4065/files/37810-291452-primary-mockup.jpg?v=1737706053&width=240",
   },
-]
-
+];
 
 export default function ProductsSection() {
-  return <ProductCarousel title="Products" products={products} />
+  const { width } = useWindowDimensions();
+  const isLargeScreen = width > 768;
+  
+  return (
+    <View className="flex-1 items-center p-4">
+      <Text className="text-3xl font-bold text-center mb-8">Products</Text>
+      <ProductCarousel title="Products" products={products} isLargeScreen={isLargeScreen} />
+    </View>
+  );
 }
-

@@ -1,4 +1,4 @@
-"use client"
+
 
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
 import { type Theme, ThemeProvider, DefaultTheme, DarkTheme } from "@react-navigation/native"
