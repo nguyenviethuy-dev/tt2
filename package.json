@@ -40,5 +40,9 @@
   "engines": {
     "node": ">=20.11.0"
   },
-  "packageManager": "pnpm@9.1.4"
+  "packageManager": "pnpm@9.1.4",
+  "dependencies": {
+    "lucide-react-native": "^0.475.0",
+    "react-native-webview": "^13.13.2"
+  }
 }
