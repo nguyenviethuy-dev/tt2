@@ -1,6 +1,8 @@
 
 
 import { useState } from "react"
+import { useRouter } from "expo-router";
+import { GestureResponderEvent } from "react-native"
 import { AuthModal } from "./home/AuthModal"
 import { View, Text, TouchableOpacity, Image, ScrollView, Platform } from "react-native"
 import { Search, User, ShoppingCart, ChevronDown, Menu, X } from "lucide-react-native"
@@ -10,6 +12,7 @@ import { ThemeToggle } from "~/components/ThemeToggle"
 import { useColorScheme } from "~/lib/useColorScheme"
 
 export default function Header() {
+  const router = useRouter();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [openMobileDropdown, setOpenMobileDropdown] = useState<string | null>(null)
@@ -19,85 +22,93 @@ export default function Header() {
     setOpenMobileDropdown(openMobileDropdown === menu ? null : menu)
   }
 
+  function navigateToHome(): void {
+    router.push("/");  // Điều hướng trong expo-router
+  }
+
+  function navigateToProductPage(): void {
+    router.push("/productPage");
+  }
+
   return (
-  <>
-      <View className={`${isDarkColorScheme ? "bg-background" : "bg-background"}`}>
-        <View className="px-4 py-4">
-          {/* Top Bar */}
-          <View className="flex-row items-center justify-between px-4 py-2">
-            <TouchableOpacity onPress={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="z-10">
-              {isMobileMenuOpen ? (
-                <X size={24} color={isDarkColorScheme ? "#fff" : "#000"} />
-              ) : (
-                <Menu size={24} color={isDarkColorScheme ? "#fff" : "#000"} />
-              )}
+    <>
+    <View className={`${isDarkColorScheme ? "bg-background" : "bg-background"}`}>
+      <View className="px-4 py-4">
+        {/* Top Bar */}
+        <View className="flex-row items-center justify-between px-4 py-2">
+          <TouchableOpacity onPress={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="z-10">
+            {isMobileMenuOpen ? (
+              <X size={24} color={isDarkColorScheme ? "#fff" : "#000"} />
+            ) : (
+              <Menu size={24} color={isDarkColorScheme ? "#fff" : "#000"} />
+            )}
+          </TouchableOpacity>
+
+          {/* Logo - centered on mobile */}
+          <TouchableOpacity onPress={navigateToHome} className="absolute left-0 right-0 items-center">
+            {Platform.OS === "web" ? (
+              <Image
+                source={{
+                  uri: isDarkColorScheme
+                    ? "https://famvibe.com/cdn/shop/t/358/assets/LOGO-allwhite-Rebranding.svg"
+                    : "https://cdn.shopify.com/s/files/1/0402/7852/4065/files/logonentrang2.svg?v=1690601667",
+                }}
+                style={{ width: 96, height: 32 }}
+                resizeMode="contain"
+              />
+            ) : (
+              <Text style={{ fontSize: 20, fontWeight: "bold", color: isDarkColorScheme ? "#fff" : "#000" }}>
+                FamVibe
+              </Text>
+            )}
+          </TouchableOpacity>
+
+          {/* Right section - Action buttons */}
+          <View className="flex-row items-center space-x-4 z-10">
+            <ThemeToggle />
+            <TouchableOpacity onPress={() => setIsAuthModalOpen(true)}>
+              <User size={24} color={isDarkColorScheme ? "#fff" : "#000"} />
             </TouchableOpacity>
-  
-            {/* Logo - centered on mobile */}
-            <View className="absolute left-0 right-0 items-center">
-              {Platform.OS === "web" ? (
-                <Image
-                  source={{
-                    uri: isDarkColorScheme
-                      ? "https://famvibe.com/cdn/shop/t/358/assets/LOGO-allwhite-Rebranding.svg"
-                      : "https://cdn.shopify.com/s/files/1/0402/7852/4065/files/logonentrang2.svg?v=1690601667",
-                  }}
-                  style={{ width: 96, height: 32 }}
-                  resizeMode="contain"
-                />
-              ) : (
-                <Text style={{ fontSize: 20, fontWeight: "bold", color: isDarkColorScheme ? "#fff" : "#000" }}>
-                  FamVibe
-                </Text>
-              )}
-            </View>
-  
-            {/* Right section - Action buttons */}
-            <View className="flex-row items-center space-x-4 z-10">
-              <ThemeToggle />
-              <TouchableOpacity onPress={() => setIsAuthModalOpen(true)}>
-                <User size={24} color={isDarkColorScheme ? "#fff" : "#000"} />
-              </TouchableOpacity>
-              <TouchableOpacity>
-                <View className="relative">
-                  <ShoppingCart size={24} color={isDarkColorScheme ? "#fff" : "#000"} />
-                  <View className="absolute -top-2 -right-2 bg-primary rounded-full h-4 w-4 items-center justify-center">
-                    <Text className="text-primary-foreground text-xs">0</Text>
-                  </View>
+            <TouchableOpacity>
+              <View className="relative">
+                <ShoppingCart size={24} color={isDarkColorScheme ? "#fff" : "#000"} />
+                <View className="absolute -top-2 -right-2 bg-primary rounded-full h-4 w-4 items-center justify-center">
+                  <Text className="text-primary-foreground text-xs">0</Text>
                 </View>
-              </TouchableOpacity>
-            </View>
-          </View>
-  
-          {/* Search Bar */}
-          <View className="relative mt-4">
-            <View className="absolute left-4 top-3 z-10">
-              <Search size={20} className="text-muted-foreground" />
-            </View>
-            <Input
-              placeholder="Search"
-              className="pl-12 pr-4 py-2.5 rounded-full border border-input bg-background text-foreground"
-              placeholderTextColor={isDarkColorScheme ? "text-muted-foreground" : "text-muted-foreground"}
-            />
+              </View>
+            </TouchableOpacity>
           </View>
         </View>
-  
-        {/* Navigation */}
-        {isMobileMenuOpen && (
-          <ScrollView
-            className="border-t border-border"
-            style={{ maxHeight: 400 }}
-            showsVerticalScrollIndicator={true}
-            persistentScrollbar={true}
-            contentContainerStyle={{ paddingBottom: 20 }}
-          >
-            <View className="py-4">
-              <TouchableOpacity className="py-2 px-4">
-                <Text className="text-foreground text-base">New Arrival</Text>
-              </TouchableOpacity>
-              <TouchableOpacity className="py-2 px-4">
-                <Text className="text-foreground text-base">Best Seller</Text>
-              </TouchableOpacity>
+
+        {/* Search Bar */}
+        <View className="relative mt-4">
+          <View className="absolute left-4 top-3 z-10">
+            <Search size={20} className="text-muted-foreground" />
+          </View>
+          <Input
+            placeholder="Search"
+            className="pl-12 pr-4 py-2.5 rounded-full border border-input bg-background text-foreground"
+            placeholderTextColor={isDarkColorScheme ? "text-muted-foreground" : "text-muted-foreground"}
+          />
+        </View>
+      </View>
+
+      {/* Navigation */}
+      {isMobileMenuOpen && (
+        <ScrollView
+          className="border-t border-border"
+          style={{ maxHeight: 400 }}
+          showsVerticalScrollIndicator={true}
+          persistentScrollbar={true}
+          contentContainerStyle={{ paddingBottom: 20 }}
+        >
+          <View className="py-4">
+            <TouchableOpacity className="py-2 px-4" onPress={navigateToProductPage}>
+              <Text className="text-foreground text-base">New Arrival</Text>
+            </TouchableOpacity>
+            <TouchableOpacity className="py-2 px-4">
+              <Text className="text-foreground text-base">Best Seller</Text>
+            </TouchableOpacity>
   
               {/* Occasion Dropdown */}
               <View>
