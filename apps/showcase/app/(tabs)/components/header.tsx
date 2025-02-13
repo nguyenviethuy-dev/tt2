@@ -11,6 +11,7 @@ import { Button } from "~/components/ui/button"
 import { ThemeToggle } from "~/components/ThemeToggle"
 import { useColorScheme } from "~/lib/useColorScheme"
 
+
 export default function Header() {
   const router = useRouter();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
@@ -82,8 +83,8 @@ export default function Header() {
 
         {/* Search Bar */}
         <View className="relative mt-4">
-          <View className="absolute left-4 top-3 z-10">
-            <Search size={20} className="text-muted-foreground" />
+          <View style={{ position: "absolute", left: 16, top: "50%", transform: [{ translateY: -12 }] }}>
+            <Search size={24} color="#888" />
           </View>
           <Input
             placeholder="Search"

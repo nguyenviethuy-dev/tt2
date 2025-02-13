@@ -3,7 +3,7 @@ import type { Product } from "./type/product"
 const products: Product[]  = [
   {
     id: 1,
-    name: "Personalized Just A Girl Who Loves Her Dogs",
+    name: "Personalized Just A Girl Who Loves Her BF",
     price: 24.99,
     rating: 5,
     colors: ["black", "white", "navy", "pink", "purple", "lightblue"],
