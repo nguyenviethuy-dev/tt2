@@ -1,4 +1,3 @@
-
 import { Tabs } from "expo-router"
 import { View, SafeAreaView, Platform, StatusBar } from "react-native"
 import { useTheme } from "@react-navigation/native"
@@ -8,6 +7,7 @@ export default function TabsLayout() {
   const theme = useTheme()
 
   return (
+    
     <SafeAreaView
       style={{
         flex: 1,
@@ -27,6 +27,12 @@ export default function TabsLayout() {
             name="index"
             options={{
               title: "Home",
+            }}
+          />
+          <Tabs.Screen
+            name="productPage"
+            options={{
+              title: "Products",
             }}
           />
         </Tabs>
