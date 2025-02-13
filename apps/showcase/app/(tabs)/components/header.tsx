@@ -81,18 +81,20 @@ export default function Header() {
           </View>
         </View>
 
-        {/* Search Bar */}
-        <View className="relative mt-4">
-          <View style={{ position: "absolute", left: 16, top: "50%", transform: [{ translateY: -12 }] }}>
-            <Search size={24} color="#888" />
+                  {/* Search Bar */}
+                  <View className="relative mt-4">
+            <View className="relative flex-row items-center">
+              <View className="absolute left-4 z-10">
+                <Search size={20} color={isDarkColorScheme ? "#888" : "#888"} />
+              </View>
+              <Input
+                placeholder="Search"
+                className="flex-1 pl-12 pr-4 py-2.5 rounded-full border border-input bg-background text-foreground"
+                placeholderTextColor={isDarkColorScheme ? "#888" : "#888"}
+              />
+            </View>
           </View>
-          <Input
-            placeholder="Search"
-            className="pl-12 pr-4 py-2.5 rounded-full border border-input bg-background text-foreground"
-            placeholderTextColor={isDarkColorScheme ? "text-muted-foreground" : "text-muted-foreground"}
-          />
         </View>
-      </View>
 
       {/* Navigation */}
       {isMobileMenuOpen && (
