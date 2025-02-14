@@ -1,4 +1,7 @@
-import ProductCarousel from "./products/product-carousel"
+import { View, Text } from 'react-native';
+import { useColorScheme } from '~/lib/useColorScheme'; // Using custom useColorScheme hook
+import ProductCarousel from "./products/product-carousel";
+import { ThemeToggle } from "~/components/ThemeToggle";
 
 const products = [
   {
@@ -55,9 +58,26 @@ const products = [
     reviews: 73,
     imageUrl: "https://cdn.shopify.com/s/files/1/0402/7852/4065/files/37810-291452-primary-mockup.jpg?v=1737706053&width=240",
   },
-]
-
+];
 
 export default function ProductsSection() {
-  return <ProductCarousel title="Products Trending Now" products={products} isLargeScreen={true} />
+  const { isDarkColorScheme } = useColorScheme();
+
+  return (
+    <View>
+      <View className="flex-1  items-center text-center p-4">
+        <Text className={`text-2xl font-bold justify-center ${
+          isDarkColorScheme ? 'text-white' : 'text-gray-900'
+        }`}>
+          Products Trending Now
+        </Text>
+      </View>
+      
+      <ProductCarousel 
+        title="Trending Products"
+        products={products} 
+        isLargeScreen={true}
+      />
+    </View>
+  );
 }
