@@ -10,6 +10,7 @@ import { Input } from "~/components/ui/input"
 import { Button } from "~/components/ui/button"
 import { ThemeToggle } from "~/components/ThemeToggle"
 import { useColorScheme } from "~/lib/useColorScheme"
+import { useCart } from '~/app/cart/Contexts/cart-context'
 
 
 export default function Header() {
@@ -18,6 +19,7 @@ export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [openMobileDropdown, setOpenMobileDropdown] = useState<string | null>(null)
   const { isDarkColorScheme } = useColorScheme()
+  const { state } = useCart()
 
   const toggleMobileDropdown = (menu: string) => {
     setOpenMobileDropdown(openMobileDropdown === menu ? null : menu)
@@ -70,12 +72,17 @@ export default function Header() {
             <TouchableOpacity onPress={() => setIsAuthModalOpen(true)}>
               <User size={24} color={isDarkColorScheme ? "#fff" : "#000"} />
             </TouchableOpacity>
-            <TouchableOpacity>
+      
+            <TouchableOpacity onPress={() => router.push('/cart')}>
               <View className="relative">
                 <ShoppingCart size={24} color={isDarkColorScheme ? "#fff" : "#000"} />
-                <View className="absolute -top-2 -right-2 bg-primary rounded-full h-4 w-4 items-center justify-center">
-                  <Text className="text-primary-foreground text-xs">0</Text>
-                </View>
+                {state.totalItems > 0 && (
+                  <View className="absolute -top-4 -right-4 bg-red-500 rounded-full h-6 w-6 items-center justify-center">
+                    <Text className="text-primary-foreground text-sm" style={{ color: '#fff' }}>
+                      {state.totalItems.toString()}
+                    </Text>
+                  </View>
+                )}
               </View>
             </TouchableOpacity>
           </View>
