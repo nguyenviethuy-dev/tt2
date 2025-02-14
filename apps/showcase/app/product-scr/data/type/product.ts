@@ -12,7 +12,9 @@ export interface Product {
   giftFor?: string[]
   description?: string
   colors?: string[]
+
 }
+
 
 const ProductType = {}
 
