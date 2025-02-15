@@ -158,7 +158,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     onPress={() => console.log("Google login")}
                   >
                     <Image 
-                      source={{ uri: "https://www.svgrepo.com/show/475656/google-color.svg" }}
+                      source={{ uri: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/768px-Google_%22G%22_logo.svg.png" }}
                       className="h-5 w-5 mr-2"
                     />
                     <Text className="text-sm font-medium text-gray-700">Sign in with Google</Text>
@@ -169,8 +169,8 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     onPress={() => console.log("Facebook login")}
                   >
                     <Image 
-                      source={{ uri: "https://www.svgrepo.com/show/475647/facebook-color.svg" }}
-                      className="h-5 w-5 mr-2"
+                      source={{ uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRjy-THa1zblXUzAkFaAPo1rdSGlcZAC2jbBg&s" }}
+                      className="h-5 w-5 mr-2 rounded-md"
                     />
                     <Text className="text-sm font-medium text-white">Sign in with Facebook</Text>
                   </TouchableOpacity>
