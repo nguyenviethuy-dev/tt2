@@ -16,7 +16,7 @@ export function ThemeToggle() {
     // Rotate animation when theme changes
     Animated.timing(rotateAnimation, {
       toValue: isDarkColorScheme ? 1 : 0,
-      duration: 400,
+      duration: 250,
       useNativeDriver: true,
     }).start();
   }, [isDarkColorScheme]);
@@ -29,22 +29,25 @@ export function ThemeToggle() {
   function toggleColorScheme() {
     const newTheme = isDarkColorScheme ? 'light' : 'dark';
 
+    setColorScheme(newTheme);
+    setAndroidNavigationBar(newTheme);
+
     // Scale animation on press
     Animated.sequence([
       Animated.timing(scaleAnimation, {
-        toValue: 0.8,
-        duration: 100,
+        toValue: 0.85,
+        duration: 80,
         useNativeDriver: true,
       }),
       Animated.timing(scaleAnimation, {
         toValue: 1,
-        duration: 100,
+        duration: 80,
         useNativeDriver: true,
       }),
     ]).start();
-
-    setColorScheme(newTheme);
-    setAndroidNavigationBar(newTheme);
+    //đổi theme sau khi animation kết thúc
+    // setColorScheme(newTheme);
+    // setAndroidNavigationBar(newTheme);
   }
 
   return (
