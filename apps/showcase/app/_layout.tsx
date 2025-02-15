@@ -218,6 +218,7 @@ export default function RootLayout() {
                   title: "New Arrivals",
                 }}
               />
+              <Stack.Screen name="productDetail" options={{ title: "Product Detail" }} />
               <Stack.Screen
                 name="cart"
                 options={{
