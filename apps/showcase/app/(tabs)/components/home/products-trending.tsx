@@ -1,6 +1,6 @@
 import { View, Text } from 'react-native';
 import { useColorScheme } from '~/lib/useColorScheme'; // Using custom useColorScheme hook
-import ProductCarousel from "./products/product-carousel";
+import ProductCarousel from "./products/product-carousel1";
 import { ThemeToggle } from "~/components/ThemeToggle";
 
 const products = [

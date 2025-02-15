@@ -1,5 +1,5 @@
 
-import ProductCarousel from "./products/product-carousel"
+import ProductCarousel from "./products/product-carousel1"
 
 const products = [
   {
