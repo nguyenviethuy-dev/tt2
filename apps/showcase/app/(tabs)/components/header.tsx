@@ -1,8 +1,7 @@
 
-
-import { useState } from "react"
+import { useState, memo } from "react"
 import { useRouter } from "expo-router"
-import { AuthModal } from "./home/AuthModal"
+import AuthModal from "./home/AuthModal"
 import { View, Text, TouchableOpacity, Image, ScrollView, Platform } from "react-native"
 import { Search, User, ShoppingCart, ChevronDown, Menu, X } from "lucide-react-native"
 import { Input } from "~/components/ui/input"
@@ -11,7 +10,7 @@ import { ThemeToggle } from "~/components/ThemeToggle"
 import { useColorScheme } from "~/lib/useColorScheme"
 import { useCart } from "~/app/cart/Contexts/cart-context"
 
-const Header = () => {
+const Header = memo(() => {
   const router = useRouter()
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -270,10 +269,10 @@ const Header = () => {
           </ScrollView>
         )}
       </View>
-      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+      {isAuthModalOpen && <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />}
     </>
   )
-}
+})
 
 export default Header
 
