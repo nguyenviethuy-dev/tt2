@@ -1,4 +1,5 @@
 
+
 import React, { createContext, useContext, useReducer, useEffect } from "react"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { Alert, View, Text } from "react-native"
@@ -66,7 +67,7 @@ const initialState: CartState = {
   totalAmount: 0,
   isLoading: true,
   error: null,
-  lastUpdated: Date.now()
+  lastUpdated: Date.now(),
 }
 
 // Context
@@ -85,11 +86,11 @@ function isValidCartState(state: unknown): state is CartState {
   const cartState = state as CartState
   return (
     cartState !== null &&
-    typeof cartState === 'object' &&
+    typeof cartState === "object" &&
     Array.isArray(cartState.items) &&
-    typeof cartState.totalItems === 'number' &&
-    typeof cartState.totalAmount === 'number' &&
-    typeof cartState.isLoading === 'boolean'
+    typeof cartState.totalItems === "number" &&
+    typeof cartState.totalAmount === "number" &&
+    typeof cartState.isLoading === "boolean"
   )
 }
 
@@ -124,10 +125,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       }
 
       const existingItemIndex = state.items.findIndex(
-        (item) =>
-          item.id === product.id &&
-          item.selectedSize === size &&
-          item.selectedColor === color
+        (item) => item.id === product.id && item.selectedSize === size && item.selectedColor === color,
       )
 
       if (existingItemIndex > -1) {
@@ -140,7 +138,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
         const newItems = [...state.items]
         newItems[existingItemIndex] = {
           ...newItems[existingItemIndex],
-          quantity: newQuantity
+          quantity: newQuantity,
         }
         newState = { ...state, items: newItems }
       } else {
@@ -153,9 +151,9 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
               addedAt: Date.now(),
               quantity,
               selectedSize: size,
-              selectedColor: color
-            }
-          ]
+              selectedColor: color,
+            },
+          ],
         }
       }
       break
@@ -174,8 +172,8 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
           item.selectedSize === action.payload.size &&
           item.selectedColor === action.payload.color
             ? { ...item, quantity: action.payload.quantity }
-            : item
-        )
+            : item,
+        ),
       }
       break
 
@@ -188,8 +186,8 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
               item.id === action.payload.id &&
               item.selectedSize === action.payload.size &&
               item.selectedColor === action.payload.color
-            )
-        )
+            ),
+        ),
       }
       break
 
@@ -207,7 +205,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
 
   // Calculate totals
   newState.totalItems = newState.items.reduce((sum, item) => sum + item.quantity, 0)
-  newState.totalAmount = newState.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+  newState.totalAmount = newState.items.reduce((sum, item) => sum + item.price * item.quantity, 0)
   newState.lastUpdated = Date.now()
 
   return newState
@@ -268,7 +266,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         if (now - item.addedAt > CART_EXPIRY_TIME) {
           dispatch({
             type: "REMOVE_ITEM",
-            payload: { id: item.id, size: item.selectedSize, color: item.selectedColor }
+            payload: { id: item.id, size: item.selectedSize, color: item.selectedColor },
           })
           showAlert("Item Removed", `${item.name} has been removed from cart due to expiration`)
         }
@@ -281,13 +279,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Helper functions
   const addToCart = async (product: Product, quantity = 1, size?: string, color?: string) => {
     try {
-      if (!product || typeof product.id !== 'number' || !product.name || typeof product.price !== 'number') {
-        throw new Error('Invalid product data')
+      if (!product || typeof product.id !== "number" || !product.name || typeof product.price !== "number") {
+        throw new Error("Invalid product data")
       }
 
       dispatch({
         type: "ADD_ITEM",
-        payload: { product, quantity, size, color }
+        payload: { product, quantity, size, color },
       })
     } catch (error) {
       dispatch({ type: "SET_ERROR", payload: "Failed to add item to cart" })
@@ -300,7 +298,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     try {
       dispatch({
         type: "REMOVE_ITEM",
-        payload: { id, size, color }
+        payload: { id, size, color },
       })
     } catch (error) {
       dispatch({ type: "SET_ERROR", payload: "Failed to remove item from cart" })
@@ -316,7 +314,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       } else {
         dispatch({
           type: "UPDATE_QUANTITY",
-          payload: { id, quantity, size, color }
+          payload: { id, quantity, size, color },
         })
       }
     } catch (error) {
@@ -338,12 +336,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }
 
   const isItemInCart = (id: number, size?: string, color?: string): boolean => {
-    return state.items.some(
-      item =>
-        item.id === id &&
-        item.selectedSize === size &&
-        item.selectedColor === color
-    )
+    return state.items.some((item) => item.id === id && item.selectedSize === size && item.selectedColor === color)
   }
 
   const getCartItemCount = (): number => {
@@ -357,7 +350,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   // Error boundary
   if (hasError) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Text>Something went wrong with the cart</Text>
         <Button onPress={() => setHasError(false)}>
           <Text>Reset Cart</Text>
@@ -376,9 +369,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       clearCart,
       isItemInCart,
       getCartItemCount,
-      getCartTotal
+      getCartTotal,
     }),
-    [state]
+    [state],
   )
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>
@@ -389,8 +382,7 @@ export const useCart = () => {
   const context = useContext(CartContext)
   if (!context) {
     throw new Error(
-      "useCart must be used within a CartProvider. " +
-      "Make sure you have wrapped your app with CartProvider."
+      "useCart must be used within a CartProvider. " + "Make sure you have wrapped your app with CartProvider.",
     )
   }
   return context
@@ -399,3 +391,4 @@ export const useCart = () => {
 export const useCartIsReady = () => {
   return useContext(CartContext) !== null
 }
+
