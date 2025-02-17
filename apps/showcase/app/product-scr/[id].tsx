@@ -154,7 +154,7 @@ export default function ProductDetail() {
             <TouchableOpacity onPress={() => handleQuantityChange(-1)} className="p-2 rounded-md bg-gray-200">
               <Minus size={20} color="#000" />
             </TouchableOpacity>
-            <Text className="text-lg font-semibold">{quantity}</Text>
+            <Text className="text-lg font-semibold px-3 py-3 dark:text-white">{quantity}</Text>
             <TouchableOpacity onPress={() => handleQuantityChange(1)} className="p-2 rounded-md bg-gray-200">
               <Plus size={20} color="#000" />
             </TouchableOpacity>
