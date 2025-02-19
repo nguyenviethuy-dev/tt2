@@ -1,9 +1,11 @@
 
+
 // import { useState, memo } from "react"
 // import { useRouter } from "expo-router"
 // import AuthModal from "./home/AuthModal"
-// import { View, Text, TouchableOpacity, Image, ScrollView, Platform } from "react-native"
-// import { Search, User, ShoppingCart, ChevronDown, Menu, X } from "lucide-react-native"
+// import { View, Text, TouchableOpacity, Image, ScrollView, Platform, Animated } from "react-native"
+// import { User, ShoppingCart, ChevronDown } from "lucide-react-native"
+// import Icon from 'react-native-vector-icons/AntDesign'
 // import { Input } from "~/components/ui/input"
 // import { Button } from "~/components/ui/button"
 // import { ThemeToggle } from "~/components/ThemeToggle"
@@ -15,6 +17,7 @@
 //   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
 //   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 //   const [openMobileDropdown, setOpenMobileDropdown] = useState<string | null>(null)
+//   const [isSearchVisible, setIsSearchVisible] = useState(false)
 //   const { isDarkColorScheme } = useColorScheme()
 //   const { state } = useCart()
 
@@ -28,6 +31,10 @@
 //     setOpenMobileDropdown(openMobileDropdown === menu ? null : menu)
 //   }
 
+//   const toggleSearch = () => {
+//     setIsSearchVisible(!isSearchVisible)
+//   }
+
 //   // Các hàm điều hướng khác
 //   const navigateToHome = () => handleNavigation("/")
 //   const navigateToProductPage = () => handleNavigation("/productPage")
@@ -38,70 +45,84 @@
 //     <>
 //       <View className={`${isDarkColorScheme ? "bg-background" : "bg-background"}`}>
 //         <View className="px-4 py-4">
-//           {/* Top Bar */}
-//           <View className="flex-row items-center justify-between px-4 py-2">
-//             <TouchableOpacity onPress={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="z-10">
-//               {isMobileMenuOpen ? (
-//                 <X size={24} color={isDarkColorScheme ? "#fff" : "#000"} />
-//               ) : (
-//                 <Menu size={24} color={isDarkColorScheme ? "#fff" : "#000"} />
-//               )}
-//             </TouchableOpacity>
-
-//             {/* Logo - centered on mobile */}
-//             <TouchableOpacity onPress={navigateToHome} className="absolute left-0 right-0 items-center">
-//               {Platform.OS === "web" ? (
-//                 <Image
-//                   source={{
-//                     uri: isDarkColorScheme
-//                       ? "https://famvibe.com/cdn/shop/t/358/assets/LOGO-allwhite-Rebranding.svg"
-//                       : "https://cdn.shopify.com/s/files/1/0402/7852/4065/files/logonentrang2.svg?v=1690601667",
-//                   }}
-//                   style={{ width: 96, height: 32 }}
-//                   resizeMode="contain"
+//           {/* Search Bar when visible */}
+//           {isSearchVisible ? (
+//             <View className="flex-row items-center space-x-4 px-4 py-2">
+//               <TouchableOpacity onPress={toggleSearch}>
+//                 <Icon 
+//                   name="close" 
+//                   size={24} 
+//                   color={isDarkColorScheme ? "#fff" : "#000"} 
 //                 />
-//               ) : (
-//                 <Text style={{ fontSize: 20, fontWeight: "bold", color: isDarkColorScheme ? "#fff" : "#000" }}>
-//                   FamVibe
-//                 </Text>
-//               )}
-//             </TouchableOpacity>
-
-//             {/* Right section - Action buttons */}
-//             <View className="flex-row items-center space-x-4 z-10">
-//               <ThemeToggle />
-//               <TouchableOpacity onPress={() => setIsAuthModalOpen(true)}>
-//                 <User size={24} color={isDarkColorScheme ? "#fff" : "#000"} />
 //               </TouchableOpacity>
-
-//               <TouchableOpacity onPress={navigateToCart}>
-//                 <View className="relative">
-//                   <ShoppingCart size={24} color={isDarkColorScheme ? "#fff" : "#000"} />
-//                   {state.totalItems > 0 && (
-//                     <View className="absolute -top-4 -right-4 bg-red-500 rounded-full h-6 w-6 items-center justify-center">
-//                       <Text className="text-primary-foreground text-sm" style={{ color: "#fff" }}>
-//                         {state.totalItems.toString()}
-//                       </Text>
-//                     </View>
-//                   )}
-//                 </View>
-//               </TouchableOpacity>
-//             </View>
-//           </View>
-
-//           {/* Search Bar */}
-//           <View className="relative mt-4">
-//             <View className="relative flex-row items-center">
-//               <View className="absolute left-4 z-10">
-//                 <Search size={20} color={isDarkColorScheme ? "#888" : "#888"} />
-//               </View>
 //               <Input
 //                 placeholder="Search"
-//                 className="flex-1 pl-12 pr-4 py-2.5 rounded-full border border-input bg-background text-foreground"
+//                 className="flex-1 pl-4 pr-4 py-2 rounded-full border border-input bg-background text-foreground"
 //                 placeholderTextColor={isDarkColorScheme ? "#888" : "#888"}
+//                 autoFocus={true}
 //               />
 //             </View>
-//           </View>
+//           ) : (
+//             /* Top Bar */
+//             <View className="flex-row items-center justify-between px-4 py-2">
+//               <View className="flex-row items-center space-x-4 z-10">
+//                 <TouchableOpacity onPress={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+//                   <Icon 
+//                     name={isMobileMenuOpen ? "close" : "menu-fold"} 
+//                     size={24} 
+//                     color={isDarkColorScheme ? "#fff" : "#000"} 
+//                   />
+//                 </TouchableOpacity>
+//                 <TouchableOpacity onPress={toggleSearch}>
+//                   <Icon 
+//                     name="search1" 
+//                     size={24} 
+//                     color={isDarkColorScheme ? "#fff" : "#000"} 
+//                   />
+//                 </TouchableOpacity>
+//               </View>
+
+//               {/* Logo - centered on mobile */}
+//               <TouchableOpacity onPress={navigateToHome} className="absolute left-0 right-0 items-center">
+//                 {Platform.OS === "web" ? (
+//                   <Image
+//                     source={{
+//                       uri: isDarkColorScheme
+//                         ? "https://famvibe.com/cdn/shop/t/358/assets/LOGO-allwhite-Rebranding.svg"
+//                         : "https://cdn.shopify.com/s/files/1/0402/7852/4065/files/logonentrang2.svg?v=1690601667",
+//                     }}
+//                     style={{ width: 96, height: 32 }}
+//                     resizeMode="contain"
+//                   />
+//                 ) : (
+//                   <Text style={{ fontSize: 20, fontWeight: "bold", color: isDarkColorScheme ? "#fff" : "#000" }}>
+//                     FamVibe
+//                   </Text>
+//                 )}
+//               </TouchableOpacity>
+
+//               {/* Right section - Action buttons */}
+//               <View className="flex-row items-center space-x-4 z-10">
+//                 <ThemeToggle />
+//                 <TouchableOpacity onPress={() => setIsAuthModalOpen(true)}>
+//                   <User size={24} color={isDarkColorScheme ? "#fff" : "#000"} />
+//                 </TouchableOpacity>
+
+//                 <TouchableOpacity onPress={navigateToCart}>
+//                   <View className="relative">
+//                     <ShoppingCart size={24} color={isDarkColorScheme ? "#fff" : "#000"} />
+//                     {state.totalItems > 0 && (
+//                       <View className="absolute -top-4 -right-4 bg-red-500 rounded-full h-6 w-6 items-center justify-center">
+//                         <Text className="text-primary-foreground text-sm" style={{ color: "#fff" }}>
+//                           {state.totalItems.toString()}
+//                         </Text>
+//                       </View>
+//                     )}
+//                   </View>
+//                 </TouchableOpacity>
+//               </View>
+//             </View>
+//           )}
 //         </View>
 
 //         {/* Navigation */}
@@ -261,7 +282,7 @@
 //                   className="flex-row items-center justify-center space-x-2 border border-input"
 //                   onPress={() => handleNavigation("/tracking")}
 //                 >
-//                   <Search size={20} className="text-foreground" />
+//                   <Icon name="search1" size={20} className="text-foreground" />
 //                   <Text className="text-foreground text-base">Tracking Order</Text>
 //                 </Button>
 //               </View>
@@ -276,17 +297,21 @@
 
 // export default Header
 
-import { useState, memo } from "react"
+"use client"
+
+import { useState, memo, useCallback } from "react"
 import { useRouter } from "expo-router"
 import AuthModal from "./home/AuthModal"
-import { View, Text, TouchableOpacity, Image, ScrollView, Platform, Animated } from "react-native"
+import { View, Text, TouchableOpacity, Image, ScrollView, Platform } from "react-native"
 import { User, ShoppingCart, ChevronDown } from "lucide-react-native"
-import Icon from 'react-native-vector-icons/AntDesign'
+import Icon from "react-native-vector-icons/AntDesign"
 import { Input } from "~/components/ui/input"
 import { Button } from "~/components/ui/button"
 import { ThemeToggle } from "~/components/ThemeToggle"
 import { useColorScheme } from "~/lib/useColorScheme"
 import { useCart } from "~/app/cart/Contexts/cart-context"
+import products from "~/app/product-scr/data/products"
+import SearchResults from "./SearchResults"
 
 const Header = memo(() => {
   const router = useRouter()
@@ -294,6 +319,8 @@ const Header = memo(() => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [openMobileDropdown, setOpenMobileDropdown] = useState<string | null>(null)
   const [isSearchVisible, setIsSearchVisible] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [searchResults, setSearchResults] = useState([])
   const { isDarkColorScheme } = useColorScheme()
   const { state } = useCart()
 
@@ -311,6 +338,30 @@ const Header = memo(() => {
     setIsSearchVisible(!isSearchVisible)
   }
 
+  const handleSearch = useCallback((text) => {
+    setSearchQuery(text)
+    if (text.length > 0) {
+      const filteredProducts = products.filter(
+        (product) =>
+          product.name.toLowerCase().includes(text.toLowerCase()) ||
+          (product.productType && product.productType.toLowerCase().includes(text.toLowerCase())) ||
+          (product.occasions &&
+            product.occasions.some((occasion) => occasion.toLowerCase().includes(text.toLowerCase()))) ||
+          (product.giftFor && product.giftFor.some((gift) => gift.toLowerCase().includes(text.toLowerCase()))),
+      )
+      setSearchResults(filteredProducts)
+    } else {
+      setSearchResults([])
+    }
+  }, [])
+
+  const handleSelectProduct = (productId) => {
+    router.push(`/${productId}`)
+    setIsSearchVisible(false)
+    setSearchQuery("")
+    setSearchResults([])
+  }
+
   // Các hàm điều hướng khác
   const navigateToHome = () => handleNavigation("/")
   const navigateToProductPage = () => handleNavigation("/productPage")
@@ -325,36 +376,33 @@ const Header = memo(() => {
           {isSearchVisible ? (
             <View className="flex-row items-center space-x-4 px-4 py-2">
               <TouchableOpacity onPress={toggleSearch}>
-                <Icon 
-                  name="close" 
-                  size={24} 
-                  color={isDarkColorScheme ? "#fff" : "#000"} 
-                />
+                <Icon name="close" size={24} color={isDarkColorScheme ? "#fff" : "#000"} />
               </TouchableOpacity>
               <Input
                 placeholder="Search"
                 className="flex-1 pl-4 pr-4 py-2 rounded-full border border-input bg-background text-foreground"
                 placeholderTextColor={isDarkColorScheme ? "#888" : "#888"}
                 autoFocus={true}
+                value={searchQuery}
+                onChangeText={handleSearch}
               />
+              <View className="absolute top-full left-0 right-0 z-50">
+                <SearchResults results={searchResults} onSelectProduct={handleSelectProduct} />
+              </View>
             </View>
           ) : (
             /* Top Bar */
             <View className="flex-row items-center justify-between px-4 py-2">
               <View className="flex-row items-center space-x-4 z-10">
                 <TouchableOpacity onPress={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-                  <Icon 
-                    name={isMobileMenuOpen ? "close" : "menu-fold"} 
-                    size={24} 
-                    color={isDarkColorScheme ? "#fff" : "#000"} 
+                  <Icon
+                    name={isMobileMenuOpen ? "close" : "menu-fold"}
+                    size={24}
+                    color={isDarkColorScheme ? "#fff" : "#000"}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={toggleSearch}>
-                  <Icon 
-                    name="search1" 
-                    size={24} 
-                    color={isDarkColorScheme ? "#fff" : "#000"} 
-                  />
+                  <Icon name="search1" size={24} color={isDarkColorScheme ? "#fff" : "#000"} />
                 </TouchableOpacity>
               </View>
 
@@ -572,3 +620,4 @@ const Header = memo(() => {
 })
 
 export default Header
+
