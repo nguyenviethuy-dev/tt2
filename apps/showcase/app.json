@@ -13,7 +13,7 @@
     },
     "updates": {
       "fallbackToCacheTimeout": 0,
-      "url": ""
+      "url": "https://u.expo.dev/d2cfcfcf-0dbe-4ae3-9050-641faf48090f"
     },
     "splash": {
       "image": "./assets/images/splash.png",
@@ -31,7 +31,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#18181B"
-      }
+      },
+      "package": "famvibe.comm"
     },
     "web": {
       "bundler": "metro",
@@ -50,9 +51,12 @@
         "origin": false
       },
       "eas": {
-        "projectId": ""
+        "projectId": "d2cfcfcf-0dbe-4ae3-9050-641faf48090f"
       }
     },
-    "owner": "*"
+    "cli": {
+      "appVersionSource": "remote"
+    },
+    "owner": "nguyenviethuy-dev"
   }
 }
