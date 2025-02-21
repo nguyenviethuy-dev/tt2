@@ -1,10 +1,21 @@
 
 
-
-import React, { useState, useCallback } from "react"
-import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet, Dimensions, Modal } from "react-native"
+import React, { useState, useCallback, useRef } from "react"
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+  StatusBar,
+  SafeAreaView,
+  ActivityIndicator,
+  RefreshControl,
+  Animated,
+} from "react-native"
 import { useRouter } from "expo-router"
-import { Home } from "lucide-react-native"
+import Icon from "react-native-vector-icons/MaterialIcons"
 import { useColorScheme } from "~/lib/useColorScheme"
 import FilterSidebar from "./FilterSidebar"
 import type { FilterState } from "./FilterSidebar"
@@ -13,12 +24,19 @@ import type { Product } from "./data/type/product"
 
 const { width } = Dimensions.get("window")
 
+const BANNER_HEIGHT = 120
+const BUTTON_ROW_HEIGHT = 50
+
 const ProductPage: React.FC = () => {
   const router = useRouter()
   const [sortBy, setSortBy] = useState("trending")
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(products)
   const [isLoading, setIsLoading] = useState(false)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const scrollY = useRef(new Animated.Value(0)).current
+
+  const { isDarkColorScheme } = useColorScheme()
 
   const productCounts = React.useMemo(() => {
     const counts = {
@@ -27,8 +45,8 @@ const ProductPage: React.FC = () => {
       occasions: {} as Record<string, number>,
       colors: {} as Record<string, number>,
       price: {
-        under25: products.filter((p) => p.price <= 25).length,
-        above25: products.filter((p) => p.price > 25).length,
+        under25: 0,
+        above25: 0,
       },
     }
 
@@ -45,19 +63,22 @@ const ProductPage: React.FC = () => {
       product.colors?.forEach((color) => {
         counts.colors[color] = (counts.colors[color] || 0) + 1
       })
+      if (product.price <= 25) {
+        counts.price.under25++
+      } else {
+        counts.price.above25++
+      }
     })
 
     return counts
   }, [])
 
-      const handleProductPress = useCallback(
-          (productId: number) => {
-            router.push(`/product-scr/${productId}`)
-          },
-          [router]
-        )
-
-  const { isDarkColorScheme } = useColorScheme()
+  const handleProductPress = useCallback(
+    (productId: number) => {
+      router.push(`/product-scr/${productId}`)
+    },
+    [router],
+  )
 
   const handleFilterChange = useCallback(
     async (filters: FilterState) => {
@@ -71,7 +92,9 @@ const ProductPage: React.FC = () => {
         filtered = filtered.filter((product) => filters.productType.includes(product.productType || ""))
       }
       if (filters.occasions.length > 0) {
-        filtered = filtered.filter((product) => product.occasions?.some((occasion) => filters.occasions.includes(occasion)))
+        filtered = filtered.filter((product) =>
+          product.occasions?.some((occasion) => filters.occasions.includes(occasion)),
+        )
       }
       if (filters.colors.length > 0) {
         filtered = filtered.filter((product) => product.colors?.some((color) => filters.colors.includes(color)))
@@ -100,77 +123,159 @@ const ProductPage: React.FC = () => {
       setIsLoading(false)
       setIsFilterOpen(false)
     },
-    [sortBy]
+    [sortBy],
+  )
+
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true)
+    // Giả lập một yêu cầu mạng
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    setFilteredProducts([...products])
+    setIsRefreshing(false)
+  }, [])
+
+  const renderProductItem = ({ item }: { item: Product }) => (
+    <TouchableOpacity style={styles.productItem} onPress={() => handleProductPress(item.id)}>
+      <Image source={{ uri: item.image }} style={styles.productImage} resizeMode="cover" />
+      <Text style={styles.productName} numberOfLines={2}>
+        {item.name}
+      </Text>
+      <Text style={styles.productPrice}>${item.price.toFixed(2)}</Text>
+    </TouchableOpacity>
+  )
+
+  const renderHeader = () => (
+    <>
+      <View style={[styles.banner, isDarkColorScheme && styles.darkBanner]}>
+        <Text style={[styles.bannerTitle, isDarkColorScheme && styles.darkText]}>New Arrival</Text>
+        <View style={styles.bannerSubtitle}>
+          <Text style={styles.bannerEmoji}>🔥</Text>
+          <Text style={[styles.bannerText, isDarkColorScheme && styles.darkText]}>
+            Valentine Sale From Feb 1st - Feb 14th Only
+          </Text>
+        </View>
+      </View>
+
+      <View style={[styles.buttonRow, isDarkColorScheme && styles.darkButtonRow]}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.iconButton}>
+          <Icon name="arrow-back" size={24} color={isDarkColorScheme ? "#fff" : "#000"} />
+        </TouchableOpacity>
+        <Text style={[styles.title, isDarkColorScheme && styles.darkText]}>New Arrivals</Text>
+        <TouchableOpacity onPress={() => setIsFilterOpen(true)} style={styles.iconButton}>
+          <Icon name="filter-list" size={24} color={isDarkColorScheme ? "#fff" : "#000"} />
+        </TouchableOpacity>
+      </View>
+    </>
   )
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.push("/")}> 
-          <Home size={28} color={isDarkColorScheme ? "#fff" : "#000"} />
-        </TouchableOpacity>
-        <Text style={[styles.title, { color: isDarkColorScheme ? "#fff" : "#000" }]}>New Arrivals</Text>
-        <TouchableOpacity onPress={() => setIsFilterOpen(true)}>
-          <Text style={styles.filterText}>Filter</Text>
-        </TouchableOpacity>
-      </View>
-
-      <FlatList
-        className="bg-white"
-        data={filteredProducts}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.productItem} onPress={() => handleProductPress(item.id)}>
-            <Image source={{ uri: item.image }} style={styles.productImage} resizeMode="cover" />
-            <Text style={styles.productName} numberOfLines={2}>{item.name}</Text>
-          </TouchableOpacity>
+    <SafeAreaView style={[styles.safeArea, isDarkColorScheme && styles.darkBackground]}>
+      <StatusBar barStyle={isDarkColorScheme ? "light-content" : "dark-content"} />
+      <View style={styles.container}>
+        {isLoading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={isDarkColorScheme ? "#fff" : "#000"} />
+          </View>
+        ) : (
+          <Animated.FlatList
+            data={filteredProducts}
+            renderItem={renderProductItem}
+            keyExtractor={(item) => item.id.toString()}
+            numColumns={2}
+            contentContainerStyle={styles.productList}
+            refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} />}
+            ListHeaderComponent={renderHeader}
+            ListEmptyComponent={
+              <Text style={[styles.emptyText, isDarkColorScheme && styles.darkText]}>No products found</Text>
+            }
+            onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
+            scrollEventThrottle={16}
+          />
         )}
-        keyExtractor={(item) => item.id.toString()}
-        numColumns={2}
-        contentContainerStyle={styles.productList}
-      />
 
-      <Modal visible={isFilterOpen} animationType="slide">
-        <View style={styles.modalContainer}>
-          <TouchableOpacity style={styles.closeButton} onPress={() => setIsFilterOpen(false)}>
-            <Text style={styles.closeText}>✕</Text>
-          </TouchableOpacity>
-          <FilterSidebar onFilterChange={handleFilterChange} productCounts={productCounts} />
-        </View>
-      </Modal>
-    </View>
+        {isFilterOpen && (
+          <View style={[styles.modalContainer, isDarkColorScheme && styles.darkModalContainer]}>
+            <TouchableOpacity style={styles.closeButton} onPress={() => setIsFilterOpen(false)}>
+              <Icon name="close" size={24} color={isDarkColorScheme ? "#fff" : "#333"} />
+            </TouchableOpacity>
+            <FilterSidebar onFilterChange={handleFilterChange} productCounts={productCounts} />
+          </View>
+        )}
+      </View>
+    </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  darkBackground: {
+    backgroundColor: "#121212",
+  },
   container: {
     flex: 1,
-    padding: 10,
   },
-  header: {
+  banner: {
+    height: BANNER_HEIGHT,
+    backgroundColor: "#F9FAFB",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+  darkBanner: {
+    backgroundColor: "#1E1E1E",
+  },
+  bannerTitle: {
+    fontFamily: "serif",
+    fontSize: 32,
+    marginBottom: 8,
+    color: "#111827",
+  },
+  bannerSubtitle: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  bannerEmoji: {
+    fontSize: 20,
+    marginRight: 8,
+  },
+  bannerText: {
+    color: "#DC2626",
+    fontSize: 16,
+  },
+  buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    paddingHorizontal: 10,
+    height: BUTTON_ROW_HEIGHT,
+    backgroundColor: "white",
+  },
+  darkButtonRow: {
+    backgroundColor: "#1E1E1E",
+  },
+  iconButton: {
+    padding: 10,
   },
   title: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "bold",
   },
-  filterText: {
-    fontSize: 16,
-    color: "blue",
-  },
   productList: {
-    paddingVertical: 10,
+    paddingHorizontal: 10,
   },
   productItem: {
     width: (width - 30) / 2,
     marginBottom: 20,
     marginHorizontal: 5,
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#e0e0e0",
     borderRadius: 8,
     padding: 10,
+    backgroundColor: "#fff",
   },
   productImage: {
     width: "100%",
@@ -183,10 +288,18 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     marginBottom: 5,
   },
+  productPrice: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#e53e3e",
+  },
   modalContainer: {
-    flex: 1,
-    padding: 20,
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: "white",
+    zIndex: 2,
+  },
+  darkModalContainer: {
+    backgroundColor: "#121212",
   },
   closeButton: {
     position: "absolute",
@@ -195,11 +308,20 @@ const styles = StyleSheet.create({
     padding: 10,
     zIndex: 10,
   },
-  closeText: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#333",
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyText: {
+    textAlign: "center",
+    marginTop: 20,
+    fontSize: 16,
+  },
+  darkText: {
+    color: "#fff",
   },
 })
 
 export default ProductPage
+
