@@ -1,13 +1,14 @@
-"use client"
+
 
 import { useRef, useEffect, useState } from "react"
-import { View, Text, ScrollView, SafeAreaView, Alert } from "react-native"
+import { View, Text, ScrollView, SafeAreaView, Alert, TouchableOpacity } from "react-native"
 import { useLocalSearchParams, useRouter } from "expo-router"
 import ViewShot from "react-native-view-shot"
 import * as MediaLibrary from "expo-media-library"
 import { Button } from "~/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
 import { Separator } from "~/components/ui/separator"
+import { Plus } from "lucide-react-native"
 
 interface OrderItem {
   id: number
@@ -52,6 +53,15 @@ export default function OrderReceipt() {
       setError("Could not load order details")
     }
   }, [params.orderData])
+
+  const handleAddReview = () => {
+    if (orderData) {
+      router.push({
+        pathname: "/review/AddReviewScreen",
+        params: { products: JSON.stringify(orderData.items) },
+      })
+    }
+  }
 
   if (error) {
     return (
@@ -103,7 +113,9 @@ export default function OrderReceipt() {
                       <Text className="text-md text-gray-500">Quantity: {item.quantity}</Text>
                       {item.selectedSize && <Text className="text-md text-gray-500">Size: {item.selectedSize}</Text>}
                       {item.selectedColor && <Text className="text-md text-gray-500">Color: {item.selectedColor}</Text>}
-                      <Text className=" dark:text-white text-md">Price: ${(item.price * item.quantity).toFixed(2)}</Text>
+                      <Text className=" dark:text-white text-md">
+                        Price: ${(item.price * item.quantity).toFixed(2)}
+                      </Text>
                     </View>
                   ))}
                 </View>
@@ -142,6 +154,9 @@ export default function OrderReceipt() {
           <Text className="dark:text-white text-md">Back to Home</Text>
         </Button>
       </View>
+      <TouchableOpacity className="absolute bottom-20 right-4 bg-blue-500 rounded-full p-4" onPress={handleAddReview}>
+        <Plus size={24} color="#fff" />
+      </TouchableOpacity>
     </SafeAreaView>
   )
 }

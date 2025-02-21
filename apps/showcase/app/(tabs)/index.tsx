@@ -8,7 +8,7 @@ import ProductsTrending from "./components/home/products-trending"
 import ProductsNewArrivals from "./components/home/products-new-arrivals"
 import GiftForReceptions from "./components/home/gift-for-receptions"
 import VideoTutorial from "./components/home/video-tutorial"
-import CustomerReviews from "./components/home/customer-reviews"
+import CustomerReviews from "../review/customer-reviews"
 import Footer from "./components/footer"
 
 export default function Homepage() {
