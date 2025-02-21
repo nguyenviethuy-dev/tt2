@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "React Native Reusables Showcase",
-    "slug": "react-native-reusables-showcase",
+    "name": "famvibe-app",
+    "slug": "famvibe-app",
     "version": "0.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -51,7 +51,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "d2cfcfcf-0dbe-4ae3-9050-641faf48090f"
+        "projectId": "71686e93-b158-478c-87e3-e208ecb666a6"
       }
     },
     "cli": {

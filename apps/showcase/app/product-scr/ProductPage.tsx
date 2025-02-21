@@ -158,7 +158,7 @@ const ProductPage: React.FC = () => {
 
       <View style={[styles.buttonRow, isDarkColorScheme && styles.darkButtonRow]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.iconButton}>
-          <Icon name="arrow-back" size={24} color={isDarkColorScheme ? "#fff" : "#000"} />
+          <Icon name="home" size={24} color={isDarkColorScheme ? "#fff" : "#000"} />
         </TouchableOpacity>
         <Text style={[styles.title, isDarkColorScheme && styles.darkText]}>New Arrivals</Text>
         <TouchableOpacity onPress={() => setIsFilterOpen(true)} style={styles.iconButton}>
@@ -303,8 +303,8 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: "absolute",
-    top: 10,
-    right: 10,
+    top: -10,
+    right: -10,
     padding: 10,
     zIndex: 10,
   },
