@@ -1,4 +1,3 @@
-"use client"
 
 import { useState, memo, useCallback, useEffect } from "react"
 import { useRouter } from "expo-router"
@@ -372,7 +371,14 @@ const Header = memo(() => {
           </ScrollView>
         )}
       </View>
-      {isAuthModalOpen && <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />}
+      <>
+      <View style={{ backgroundColor }}>{/* ... rest of the header content ... */}</View>
+      {isAuthModalOpen && (
+        <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "transparent" }}>
+          <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} isDarkColorScheme={isDarkColorScheme} />
+        </View>
+      )}
+    </>
     </>
   )
 })
