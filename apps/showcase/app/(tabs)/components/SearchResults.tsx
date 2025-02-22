@@ -1,37 +1,60 @@
 import type React from "react"
-import { View, Text, Image, TouchableOpacity, FlatList } from "react-native"
+import { View, Text, Image, TouchableOpacity, ScrollView } from "react-native"
+import type { TrendingUp, Sparkles } from "lucide-react-native"
 import type { Product } from "~/app/product-scr/data/type/product"
 
 interface SearchResultsProps {
-  results: Product[]
+  results: (Product & { icon?: typeof TrendingUp | typeof Sparkles })[]
   onSelectProduct: (productId: number) => void
+  isDefaultSuggestion: boolean
+  isDarkColorScheme: boolean
 }
 
-const SearchResults: React.FC<SearchResultsProps> = ({ results, onSelectProduct }) => {
-  const renderItem = ({ item }: { item: Product }) => (
+const SearchResults: React.FC<SearchResultsProps> = ({
+  results,
+  onSelectProduct,
+  isDefaultSuggestion,
+  isDarkColorScheme,
+}) => {
+  const textColor = isDarkColorScheme ? "#fff" : "#000"
+  const backgroundColor = isDarkColorScheme ? "#1a1a1a" : "#fff"
+  const borderColor = isDarkColorScheme ? "#333" : "#ccc"
+
+  const renderItem = (item: Product & { icon?: typeof TrendingUp | typeof Sparkles }) => (
     <TouchableOpacity
-      className="flex-row items-center p-2 border-b border-gray-200"
+      key={item.id.toString()}
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: borderColor,
+        backgroundColor: backgroundColor,
+      }}
       onPress={() => onSelectProduct(item.id)}
     >
-      <Image source={{ uri: item.image }} className="w-16 h-16 rounded-md mr-4" resizeMode="cover" />
-      <View className="flex-1">
-        <Text className="text-foreground font-semibold" numberOfLines={1}>
-          {item.name}
-        </Text>
-        <Text className="text-muted-foreground">${item.price.toFixed(2)}</Text>
-        {item.productType && <Text className="text-muted-foreground text-sm">{item.productType}</Text>}
-      </View>
+      {isDefaultSuggestion ? (
+        <>
+          {item.icon && <item.icon size={20} color={isDarkColorScheme ? "#888" : "#666"} style={{ marginRight: 12 }} />}
+          <Text style={{ flex: 1, fontSize: 16, color: textColor }}>{item.name}</Text>
+        </>
+      ) : (
+        <>
+          <Image
+            source={{ uri: item.image }}
+            style={{ width: 50, height: 50, borderRadius: 25, marginRight: 12 }}
+            resizeMode="cover"
+          />
+          <View style={{ flex: 1 }}>
+            <Text style={{ fontSize: 16, fontWeight: "bold", color: textColor }}>{item.name}</Text>
+            <Text style={{ color: isDarkColorScheme ? "#888" : "#666" }}>${item.price.toFixed(2)}</Text>
+          </View>
+        </>
+      )}
     </TouchableOpacity>
   )
 
-  return (
-    <FlatList
-      data={results}
-      renderItem={renderItem}
-      keyExtractor={(item) => item.id.toString()}
-      className="bg-background"
-    />
-  )
+  return <ScrollView style={{ backgroundColor: backgroundColor }}>{results.map(renderItem)}</ScrollView>
 }
 
 export default SearchResults
