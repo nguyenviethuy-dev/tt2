@@ -1,5 +1,4 @@
 
-
 import { useState, memo } from "react"
 import { View, Text, Image, TouchableOpacity, Modal, ScrollView, Platform } from "react-native"
 import { X } from "lucide-react-native"
@@ -9,21 +8,27 @@ import { Input } from "~/components/ui/input"
 interface AuthModalProps {
   isOpen: boolean
   onClose: () => void
+  isDarkColorScheme: boolean
 }
 
-// Change to a named function component and export it directly
-function AuthModal({ isOpen, onClose }: AuthModalProps) {
+function AuthModal({ isOpen, onClose, isDarkColorScheme }: AuthModalProps) {
   const [isLogin, setIsLogin] = useState(true)
   const [isForgotPassword, setIsForgotPassword] = useState(false)
 
-  // Component implementation remains the same
+  const textColor = isDarkColorScheme ? "#fff" : "#6B7280"
+  const backgroundColor = isDarkColorScheme ? "#1a1a1a" : "#fff"
+
   return (
     <Modal visible={isOpen} animationType="fade" transparent={true} onRequestClose={onClose}>
       <View className="flex-1 bg-black/50">
         <ScrollView contentContainerClassName="flex-grow justify-center p-4">
-          <View className="bg-white rounded-lg w-full max-w-[800px] shadow-2xl">
+          <View className="rounded-lg w-full max-w-[800px] shadow-2xl" style={{ backgroundColor }}>
             {/* Close Button */}
-            <TouchableOpacity onPress={onClose} className="absolute right-4 top-4 z-10">
+            <TouchableOpacity 
+              onPress={onClose} 
+              className="absolute right-4 top-4 z-10"
+              style={{ zIndex: 9999 }}
+            >
               <X size={24} color="#6B7280" />
             </TouchableOpacity>
 
@@ -50,7 +55,10 @@ function AuthModal({ isOpen, onClose }: AuthModalProps) {
                       className={`pb-2 px-4 ${isLogin ? "border-b-2 border-rose-600" : ""}`}
                       onPress={() => setIsLogin(true)}
                     >
-                      <Text className={`text-lg font-medium ${isLogin ? "text-rose-600" : "text-gray-400"}`}>
+                      <Text 
+                        style={{ color: isLogin ? "#DC2626" : textColor }}
+                        className="text-lg font-medium"
+                      >
                         Login
                       </Text>
                     </TouchableOpacity>
@@ -58,7 +66,10 @@ function AuthModal({ isOpen, onClose }: AuthModalProps) {
                       className={`pb-2 px-4 ${!isLogin ? "border-b-2 border-rose-600" : ""}`}
                       onPress={() => setIsLogin(false)}
                     >
-                      <Text className={`text-lg font-medium ${!isLogin ? "text-rose-600" : "text-gray-400"}`}>
+                      <Text 
+                        style={{ color: !isLogin ? "#DC2626" : textColor }}
+                        className="text-lg font-medium"
+                      >
                         Signup
                       </Text>
                     </TouchableOpacity>
@@ -138,7 +149,7 @@ function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   </View>
                 </View>
 
-                <View className="mt-6 space-y-4">
+                <View className="mt-6 space-y-4 gap-4">
                   <TouchableOpacity
                     className="flex-row items-center justify-center p-3 rounded-lg border border-gray-300 bg-white"
                     onPress={() => console.log("Google login")}
