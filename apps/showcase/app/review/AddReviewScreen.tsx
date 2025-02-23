@@ -12,11 +12,14 @@ import {
   KeyboardAvoidingView,
   Modal,
   FlatList,
+  Image,
 } from "react-native"
 import { useColorScheme } from "~/lib/useColorScheme"
-import { router, useLocalSearchParams } from "expo-router"
-import { Star, ChevronDown } from "lucide-react-native"
+import { router } from "expo-router"
+import { Star, ChevronDown, Camera } from "lucide-react-native"
 import { addReview, getCurrentUTCDateTime } from "./data/reviews"
+import * as ImagePicker from "expo-image-picker"
+import products from "~/app/product-scr/data/products"
 
 // Function to get day name
 const getDayName = () => {
@@ -26,25 +29,14 @@ const getDayName = () => {
 
 export default function AddReviewScreen() {
   const { isDarkColorScheme } = useColorScheme()
-  const params = useLocalSearchParams()
   const [name, setName] = useState("")
   const [review, setReview] = useState("")
   const [rating, setRating] = useState(0)
   const [currentDateTime, setCurrentDateTime] = useState(getCurrentUTCDateTime())
   const [currentDay, setCurrentDay] = useState(getDayName())
-  const [products, setProducts] = useState([])
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [isModalVisible, setModalVisible] = useState(false)
-
-  useEffect(() => {
-    if (params.products) {
-      const parsedProducts = JSON.parse(params.products as string)
-      setProducts(parsedProducts)
-      if (parsedProducts.length > 0) {
-        setSelectedProduct(parsedProducts[0])
-      }
-    }
-  }, [params.products])
+  const [images, setImages] = useState([])
 
   // Update time every second
   useEffect(() => {
@@ -79,8 +71,8 @@ export default function AddReviewScreen() {
       name: name.trim(),
       text: review.trim(),
       rating,
-      image:
-        "https://s3.evgcloud.net/xboostproductreviews/40278524065/20241128/75e5b9e1-f7b2-4579-b641-933f183102ab.jpg",
+      image: images.length > 0 ? images[0] : "default_image_url",
+      images: images,
       date: currentDateTime,
       userLogin: "nguyenviethuy-dev",
       productId: selectedProduct.id,
@@ -113,6 +105,19 @@ export default function AddReviewScreen() {
       <Text className={isDarkColorScheme ? "text-white" : "text-black"}>{item.name}</Text>
     </TouchableOpacity>
   )
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    })
+
+    if (!result.canceled) {
+      setImages([...images, result.assets[0].uri])
+    }
+  }
 
   return (
     <SafeAreaView className={`flex-1 ${isDarkColorScheme ? "bg-gray-900" : "bg-gray-50"}`}>
@@ -201,6 +206,29 @@ export default function AddReviewScreen() {
                     : "bg-white text-gray-900 border-gray-200"
                 } border min-h-[150px]`}
               />
+            </View>
+
+            {/* Image Upload Section */}
+            <View>
+              <Text className={`text-lg font-semibold mb-2 ${isDarkColorScheme ? "text-white" : "text-gray-900"}`}>
+                Add Images
+              </Text>
+              <TouchableOpacity
+                onPress={pickImage}
+                className={`p-4 rounded-lg flex-row items-center justify-center ${
+                  isDarkColorScheme ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"
+                } border`}
+              >
+                <Camera className="mr-2" color={isDarkColorScheme ? "#fff" : "#000"} />
+                <Text className={isDarkColorScheme ? "text-white" : "text-black"}>Add Image</Text>
+              </TouchableOpacity>
+              {images.length > 0 && (
+                <ScrollView horizontal className="mt-4">
+                  {images.map((image, index) => (
+                    <Image key={index} source={{ uri: image }} className="w-20 h-20 rounded-lg mr-2" />
+                  ))}
+                </ScrollView>
+              )}
             </View>
 
             {/* User Info */}
