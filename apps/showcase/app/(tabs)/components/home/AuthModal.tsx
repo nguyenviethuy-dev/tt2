@@ -76,7 +76,7 @@ function AuthModal({ isOpen, onClose, isDarkColorScheme }: AuthModalProps) {
                   </View>
 
                   {/* Form */}
-                  <View className="space-y-4">
+                  <View className="space-y-4 gap-4">
                     {!isLogin && (
                       <>
                         <Input
@@ -138,14 +138,12 @@ function AuthModal({ isOpen, onClose, isDarkColorScheme }: AuthModalProps) {
 
               {/* Social Login */}
               <View className="mt-6">
-                <View className="relative py-2">
-                  <View className="absolute inset-0 items-center justify-center">
+                <View className="relative py-2 flex items-center">
+                  <View className="absolute inset-0 flex items-center">
                     <View className="w-full h-[1px] bg-gray-300" />
                   </View>
-                  <View className="relative items-center">
-                    <View className="bg-white px-2">
-                      <Text className="text-gray-500">Or log in with</Text>
-                    </View>
+                  <View className="px-2">
+                    <Text className="text-gray-500">Or log in with</Text>
                   </View>
                 </View>
 
