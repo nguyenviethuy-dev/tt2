@@ -5,13 +5,13 @@ import { getStorage } from "firebase/storage";
 
 // Cấu hình Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyDD6L0l5geonZMu29G7JZ4tP1I6PxH9ABw",
-  authDomain: "famvibbe-app.firebaseapp.com",
-  projectId: "famvibbe-app",
-  storageBucket: "famvibbe-app.appspot.com", // Sửa lỗi storageBucket
-  messagingSenderId: "820698238105",
-  appId: "1:820698238105:web:df1ea9706df9e3e81e3c08",
-  measurementId: "G-TW079GV8PJ",
+  apiKey: "",
+  authDomain: "fapp.firebaseapp.com",
+  projectId: "faapp",
+  storageBucket: "famvibbe.at.com", // Sửa lỗi storageBucket
+  messagingSenderId: "82238105",
+  appId: "1:82069829e3c08",
+  measurementId: "G9GV8PJ",
 };
 
 // Khởi tạo Firebase
