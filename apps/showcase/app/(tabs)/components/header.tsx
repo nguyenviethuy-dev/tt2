@@ -1,40 +1,51 @@
 
 
-import { useState, memo, useCallback, useEffect } from "react"
-import { useRouter } from "expo-router"
-import AuthModal from "./home/AuthModal"
-import { View, Text, TouchableOpacity, Image, ScrollView, Platform, Alert } from "react-native"
-import { User, ShoppingCart, ChevronDown, TrendingUp, Sparkles, Settings, LogOut } from "lucide-react-native"
-import Icon from "react-native-vector-icons/AntDesign"
-import { Input } from "~/components/ui/input"
-import { Button } from "~/components/ui/button"
-import { ThemeToggle } from "~/components/ThemeToggle"
-import { useColorScheme } from "~/lib/useColorScheme"
-import { useCart } from "~/app/cart/Contexts/cart-context"
-import products from "~/app/product-scr/data/products"
-import SearchResults from "./SearchResults"
-import { auth } from "~/app/services/firebaseConfig"
-import { type User as FirebaseUser, signOut } from "firebase/auth"
+import { useState, memo, useCallback, useEffect } from "react";
+import { useRouter } from "expo-router";
+import AuthModal from "./home/AuthModal";
+import { View, Text, TouchableOpacity, Image, ScrollView, Platform, Alert } from "react-native";
+import { User, ShoppingCart, ChevronDown, TrendingUp, Sparkles, Settings, LogOut } from "lucide-react-native";
+import Icon from "react-native-vector-icons/AntDesign";
+import { Input } from "~/components/ui/input";
+import { Button } from "~/components/ui/button";
+import { ThemeToggle } from "~/components/ThemeToggle"; // Vẫn import nhưng không dùng
+import { useColorScheme } from "~/lib/useColorScheme";
+import { useCart } from "~/app/cart/Contexts/cart-context";
+import products from "~/app/product-scr/data/products";
+import SearchResults from "./SearchResults";
+import { auth } from "~/app/services/firebaseConfig";
+import { type User as FirebaseUser, signOut } from "firebase/auth";
 
 const Header = memo(() => {
-  const router = useRouter()
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [openMobileDropdown, setOpenMobileDropdown] = useState<string | null>(null)
-  const [isSearchVisible, setIsSearchVisible] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [searchResults, setSearchResults] = useState([])
-  const [defaultSuggestions, setDefaultSuggestions] = useState([])
-  const { isDarkColorScheme } = useColorScheme()
-  const { state } = useCart()
-  const [user, setUser] = useState<FirebaseUser | null>(null)
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
-  const [isToggleOn, setIsToggleOn] = useState(false)
+  const router = useRouter();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [openMobileDropdown, setOpenMobileDropdown] = useState<string | null>(null);
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [defaultSuggestions, setDefaultSuggestions] = useState([]);
+  const { isDarkColorScheme } = useColorScheme();
+  const { state } = useCart();
+  const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isToggleOn, setIsToggleOn] = useState(false);
 
-  const textColor = isDarkColorScheme ? "text-white" : "text-black"
-  const backgroundColor = isDarkColorScheme ? "#1a1a1a" : "#fff"
-  const borderColor = isDarkColorScheme ? "#333" : "#ccc"
-  const iconColor = isDarkColorScheme ? "#ffffff" : "#000000"
+  const textColor = isDarkColorScheme ? "text-white" : "text-black";
+  const backgroundColor = isDarkColorScheme ? "#1a1a1a" : "#fff";
+  const borderColor = isDarkColorScheme ? "#333" : "#ccc";
+  const iconColor = isDarkColorScheme ? "#ffffff" : "#000000";
+
+  // Theo dõi trạng thái xác thực
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      setUser(currentUser);
+      if (!currentUser) {
+        setIsUserMenuOpen(false); // Đóng menu khi không có user
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     setDefaultSuggestions(
@@ -42,45 +53,52 @@ const Header = memo(() => {
         ...product,
         icon: index < 3 ? TrendingUp : Sparkles,
       })),
-    )
-  }, [])
+    );
+  }, []);
 
   const handleAuthStateChange = useCallback((currentUser: FirebaseUser | null) => {
-    setUser(currentUser)
-  }, [])
+    setUser(currentUser);
+  }, []);
 
   const handleLogout = useCallback(async () => {
     try {
-      await signOut(auth)
-      setIsUserMenuOpen(false)
-      Alert.alert("Success", "You have been logged out successfully")
+      console.log("Starting logout...");
+      await signOut(auth);
+      console.log("Logout successful");
+      setUser(null);
+      setIsUserMenuOpen(false);
+      Alert.alert("Success", "You have been logged out successfully");
     } catch (error) {
-      console.error("Error signing out: ", error)
-      Alert.alert("Error", "Failed to log out. Please try again.")
+      console.error("Logout error: ", error);
+      if (error.code === "permission-denied") {
+        Alert.alert("Error", "Permission denied. Please check your Firebase configuration.");
+      } else {
+        Alert.alert("Error", "Failed to log out: " + error.message);
+      }
     }
-  }, [])
+  }, []);
 
   const handleNavigation = (path: string) => {
-    router.push(path)
-    setIsMobileMenuOpen(false)
-    setOpenMobileDropdown(null)
-  }
+    router.push(path);
+    setIsMobileMenuOpen(false);
+    setOpenMobileDropdown(null);
+  };
 
   const toggleMobileDropdown = (menu: string) => {
-    setOpenMobileDropdown(openMobileDropdown === menu ? null : menu)
-  }
+    setOpenMobileDropdown(openMobileDropdown === menu ? null : menu);
+  };
 
   const toggleSearch = () => {
-    setIsSearchVisible(!isSearchVisible)
+    setIsSearchVisible(!isSearchVisible);
     if (!isSearchVisible) {
-      setSearchQuery("")
-      setSearchResults(defaultSuggestions)
+      setSearchQuery("");
+      setSearchResults(defaultSuggestions);
     }
-  }
+  };
 
   const handleSearch = useCallback(
     (text) => {
-      setSearchQuery(text)
+      setSearchQuery(text);
       if (text.length > 0) {
         const filteredProducts = products.filter(
           (product) =>
@@ -89,29 +107,29 @@ const Header = memo(() => {
             (product.occasions &&
               product.occasions.some((occasion) => occasion.toLowerCase().includes(text.toLowerCase()))) ||
             (product.giftFor && product.giftFor.some((gift) => gift.toLowerCase().includes(text.toLowerCase()))),
-        )
-        setSearchResults(filteredProducts)
+        );
+        setSearchResults(filteredProducts);
       } else {
-        setSearchResults(defaultSuggestions)
+        setSearchResults(defaultSuggestions);
       }
     },
     [defaultSuggestions],
-  )
+  );
 
   const handleSelectProduct = useCallback(
     (productId) => {
-      router.push(`/product-scr/${productId}`)
-      setIsSearchVisible(false)
-      setSearchQuery("")
-      setSearchResults([])
+      router.push(`/product-scr/${productId}`);
+      setIsSearchVisible(false);
+      setSearchQuery("");
+      setSearchResults([]);
     },
     [router],
-  )
+  );
 
-  const navigateToHome = () => handleNavigation("/")
-  const navigateToProductPage = () => handleNavigation("/productPage")
-  const navigateToBestSeller = () => handleNavigation("/best-seller")
-  const navigateToCart = () => handleNavigation("/cart")
+  const navigateToHome = () => handleNavigation("/");
+  const navigateToProductPage = () => handleNavigation("/productPage");
+  const navigateToBestSeller = () => handleNavigation("/best-seller");
+  const navigateToCart = () => handleNavigation("/cart");
 
   return (
     <>
@@ -170,7 +188,7 @@ const Header = memo(() => {
               </TouchableOpacity>
 
               <View className="flex-row items-center space-x-4 z-10">
-                <ThemeToggle />
+                {/* <ThemeToggle /> */}
                 {user ? (
                   <View>
                     <TouchableOpacity onPress={() => setIsUserMenuOpen(!isUserMenuOpen)}>
@@ -178,67 +196,102 @@ const Header = memo(() => {
                     </TouchableOpacity>
                     {isUserMenuOpen && (
                       <View
-                        className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg ${isDarkColorScheme ? "bg-gray-800" : "bg-white"} ring-1 ring-black ring-opacity-5`}
+                        className={`absolute right-0 mt-2 w-48 rounded-md shadow-lg ${
+                          isDarkColorScheme ? "bg-gray-800" : "bg-white"
+                        } ring-1 ring-black ring-opacity-5`}
                       >
                         <View className="relative">
-                        <TouchableOpacity
-                          className="absolute top-2 right-2 z-10"
-                          onPress={() => setIsUserMenuOpen(false)}
-                        >
-                          <Icon name="close" size={16} color={iconColor} />
-                        </TouchableOpacity>
-                        
-                        <TouchableOpacity
-                          className={`block px-4 py-2 text-sm ${isDarkColorScheme ? "text-gray-300 hover:bg-gray-700" : "text-gray-700 hover:bg-gray-100"}`}
-                          onPress={() => {
-                            handleNavigation("/settings")
-                            setIsUserMenuOpen(false)
-                          }}
-                        >
-                          <View className="flex-row items-center">
-                            <Settings size={16} color={iconColor} />
-                            <Text className={`ml-2 ${textColor}`}>Settings</Text>
-                          </View>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          className={`block px-4 py-2 text-sm ${isDarkColorScheme ? "text-gray-300 hover:bg-gray-700" : "text-gray-700 hover:bg-gray-100"}`}
-                          onPress={() => {
-                            setIsToggleOn(!isToggleOn)
-                            setIsUserMenuOpen(false)
-                          }}
-                        >
-                          <View className="flex-row items-center justify-between">
+                          <TouchableOpacity
+                            className="absolute top-2 right-2 z-10"
+                            onPress={() => setIsUserMenuOpen(false)}
+                          >
+                            <Icon name="close" size={16} color={iconColor} />
+                          </TouchableOpacity>
+
+                          <TouchableOpacity
+                            className={`block px-4 py-2 text-sm ${
+                              isDarkColorScheme ? "text-gray-300 hover:bg-gray-700" : "text-gray-700 hover:bg-gray-100"
+                            }`}
+                            onPress={() => {
+                              handleNavigation("/settings");
+                              setIsUserMenuOpen(false);
+                            }}
+                          >
                             <View className="flex-row items-center">
-                              <Icon name="switch" size={16} color={iconColor} />
-                              <Text className={`ml-2 ${textColor}`}>Toggle Switch</Text>
+                              <Settings size={16} color={iconColor} />
+                              <Text className={`ml-2 ${textColor}`}>Settings</Text>
                             </View>
-                            <View
-                              className={`w-10 h-6 ${isToggleOn ? "bg-green-500" : isDarkColorScheme ? "bg-gray-600" : "bg-gray-300"} rounded-full relative`}
-                            >
+                          </TouchableOpacity>
+
+                          <TouchableOpacity
+                            className={`block px-4 py-2 text-sm ${
+                              isDarkColorScheme ? "text-gray-300 hover:bg-gray-700" : "text-gray-700 hover:bg-gray-100"
+                            }`}
+                            onPress={() => {
+                              handleNavigation("/cart/OrderList");
+                              setIsUserMenuOpen(false);
+                            }}
+                          >
+                            <View className="flex-row items-center">
+                              <Icon name="profile" size={16} color={iconColor} />
+                              <Text className={`ml-2 ${textColor}`}>Order List</Text>
+                            </View>
+                          </TouchableOpacity>
+
+                          <TouchableOpacity
+                            className={`block px-4 py-2 text-sm ${
+                              isDarkColorScheme ? "text-gray-300 hover:bg-gray-700" : "text-gray-700 hover:bg-gray-100"
+                            }`}
+                            onPress={() => {
+                              setIsToggleOn(!isToggleOn);
+                              setIsUserMenuOpen(false);
+                            }}
+                          >
+                            <View className="flex-row items-center justify-between">
+                              <View className="flex-row items-center">
+                                <Icon name="swap" size={16} color={iconColor} />
+                                <Text className={`ml-2 ${textColor}`}>Toggle Switch</Text>
+                              </View>
                               <View
-                                className={`w-5 h-5 rounded-full absolute top-0.5 ${isToggleOn ? "right-0.5 bg-white" : isDarkColorScheme ? "right-0.5 bg-white" : "left-0.5 bg-gray-100"}`}
-                              />
+                                className={`w-10 h-6 ${
+                                  isToggleOn ? "bg-green-500" : isDarkColorScheme ? "bg-gray-600" : "bg-gray-300"
+                                } rounded-full relative`}
+                              >
+                                <View
+                                  className={`w-5 h-5 rounded-full absolute top-0.5 ${
+                                    isToggleOn
+                                      ? "right-0.5 bg-white"
+                                      : isDarkColorScheme
+                                      ? "right-0.5 bg-white"
+                                      : "left-0.5 bg-gray-100"
+                                  }`}
+                                />
+                              </View>
                             </View>
-                          </View>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          className={`block px-4 py-2 text-sm ${isDarkColorScheme ? "text-gray-300 hover:bg-gray-700" : "text-gray-700 hover:bg-gray-100"}`}
-                          onPress={() => {
-                            handleLogout()
-                            setIsUserMenuOpen(false)
-                          }}
-                        >
-                          <View className="flex-row items-center">
-                            <LogOut size={16} color={iconColor} />
-                            <Text className={`ml-2 ${textColor}`}>Logout</Text>
-                          </View>
-                        </TouchableOpacity>
+                          </TouchableOpacity>
+
+                          <TouchableOpacity
+                            className={`block px-4 py-2 text-sm ${
+                              isDarkColorScheme ? "text-gray-300 hover:bg-gray-700" : "text-gray-700 hover:bg-gray-100"
+                            }`}
+                            onPress={handleLogout}
+                          >
+                            <View className="flex-row items-center">
+                              <LogOut size={16} color={iconColor} />
+                              <Text className={`ml-2 ${textColor}`}>Logout</Text>
+                            </View>
+                          </TouchableOpacity>
                         </View>
                       </View>
                     )}
                   </View>
                 ) : (
-                  <TouchableOpacity onPress={() => setIsAuthModalOpen(true)}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setIsUserMenuOpen(false);
+                      setIsAuthModalOpen(true);
+                    }}
+                  >
                     <User size={24} color={iconColor} />
                   </TouchableOpacity>
                 )}
@@ -409,7 +462,9 @@ const Header = memo(() => {
               <View className="mt-4 px-4">
                 <Button
                   variant="outline"
-                  className={`flex-row items-center justify-center space-x-2 border ${isDarkColorScheme ? "border-gray-600" : "border-gray-300"}`}
+                  className={`flex-row items-center justify-center space-x-2 border ${
+                    isDarkColorScheme ? "border-gray-600" : "border-gray-300"
+                  }`}
                   onPress={() => handleNavigation("/tracking")}
                 >
                   <Icon name="search1" size={20} color={iconColor} />
@@ -431,8 +486,7 @@ const Header = memo(() => {
         </View>
       )}
     </>
-  )
-})
+  );
+});
 
-export default Header
-
+export default Header;

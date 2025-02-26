@@ -1,49 +1,48 @@
-
-import { useState, useEffect } from "react"
-import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native"
-import { Star, Plus, Minus } from "lucide-react-native"
-import { useRouter, useLocalSearchParams } from "expo-router"
-import { Alert, AlertDescription } from "~/components/ui/alert"
-import { useCart } from "../cart/Contexts/cart-context"
-import products from "./data/products"
-import type { Product } from "./data/type/product"
+import { useState, useEffect, useCallback } from "react";
+import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
+import { Star, Plus, Minus } from "lucide-react-native";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { Alert, AlertDescription } from "~/components/ui/alert";
+import { useCart } from "../cart/Contexts/cart-context";
+import products from "./data/products";
+import type { Product } from "./data/type/product";
 
 export default function ProductDetail() {
-  const router = useRouter()
-  const { id } = useLocalSearchParams()
-  const [product, setProduct] = useState<Product | null>(null)
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
-  const [quantity, setQuantity] = useState(1)
-  const [selectedSize, setSelectedSize] = useState("")
-  const [selectedColor, setSelectedColor] = useState("")
-  const [error, setError] = useState("")
-  const { dispatch } = useCart()
+  const router = useRouter();
+  const { id } = useLocalSearchParams();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+  const [selectedSize, setSelectedSize] = useState("");
+  const [selectedColor, setSelectedColor] = useState("");
+  const [error, setError] = useState("");
+  const { dispatch } = useCart();
 
-  const sizes = ["S", "M", "L", "XL", "2XL", "3XL", "4XL"]
-  const colors = product?.colors || []
+  const sizes = ["S", "M", "L", "XL", "2XL", "3XL", "4XL"];
+  const colors = product?.colors || [];
 
   useEffect(() => {
-    const foundProduct = products.find((p) => p.id === Number(id))
+    const foundProduct = products.find((p) => p.id === Number(id));
     if (foundProduct) {
-      setProduct(foundProduct)
+      setProduct(foundProduct);
       if (foundProduct.colors && foundProduct.colors.length > 0) {
-        setSelectedColor(foundProduct.colors[0])
+        setSelectedColor(foundProduct.colors[0]);
       }
     }
-  }, [id])
+  }, [id]);
 
-  const handleQuantityChange = (delta: number) => {
-    setQuantity((prev) => Math.max(1, prev + delta))
-  }
+  const handleQuantityChange = useCallback((delta: number) => {
+    setQuantity((prev) => Math.max(1, prev + delta));
+  }, []);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = useCallback(() => {
     if (!selectedSize) {
-      setError("Please select a size")
-      return
+      setError("Please select a size");
+      return;
     }
     if (colors.length > 0 && !selectedColor) {
-      setError("Please select a color")
-      return
+      setError("Please select a color");
+      return;
     }
 
     if (product) {
@@ -55,10 +54,20 @@ export default function ProductDetail() {
           size: selectedSize,
           color: selectedColor,
         },
-      })
-      router.push("/cart")
+      });
+      router.push("/cart");
     }
-  }
+  }, [product, quantity, selectedSize, selectedColor, colors, dispatch, router]);
+
+  const handleSizeSelect = useCallback((size: string) => {
+    setSelectedSize(size);
+    setError(""); // Xóa lỗi khi chọn size
+  }, []);
+
+  const handleColorSelect = useCallback((color: string) => {
+    setSelectedColor(color);
+    setError(""); // Xóa lỗi khi chọn color
+  }, []);
 
   if (!product) {
     return (
@@ -67,10 +76,10 @@ export default function ProductDetail() {
         <View className="h-8 bg-gray-200 rounded w-3/4 mb-4" />
         <View className="h-4 bg-gray-200 rounded w-1/4" />
       </View>
-    )
+    );
   }
 
-  const images = [product.image, product.image1].filter(Boolean)
+  const images = [product.image, product.image1].filter(Boolean);
 
   return (
     <ScrollView className="flex-1 bg-background">
@@ -110,7 +119,7 @@ export default function ProductDetail() {
             {sizes.map((size) => (
               <TouchableOpacity
                 key={size}
-                onPress={() => setSelectedSize(size)}
+                onPress={() => handleSizeSelect(size)}
                 className={`p-3 rounded-md border ${
                   selectedSize === size ? "bg-primary border-primary" : "border-gray-200"
                 }`}
@@ -124,28 +133,30 @@ export default function ProductDetail() {
         </View>
 
         {/* Color Selection */}
-        <View className="space-y-2">
-          <Text className="font-semibold text-foreground">Color</Text>
-          <View className="flex-row flex-wrap gap-2">
-            {colors.map((color) => (
-              <TouchableOpacity
-                key={color}
-                onPress={() => setSelectedColor(color)}
-                className={`p-3 rounded-md border ${
-                  selectedColor === color ? "bg-primary border-primary" : "border-gray-200"
-                }`}
-              >
-                <View
-                  className="w-4 h-4 rounded-full border border-gray-200"
-                  style={{ backgroundColor: color.toLowerCase() }}
-                />
-                <Text className={`ml-2 ${selectedColor === color ? "text-primary-foreground" : "text-foreground"}`}>
-                  {color}
-                </Text>
-              </TouchableOpacity>
-            ))}
+        {colors.length > 0 && (
+          <View className="space-y-2">
+            <Text className="font-semibold text-foreground">Color</Text>
+            <View className="flex-row flex-wrap gap-2">
+              {colors.map((color) => (
+                <TouchableOpacity
+                  key={color}
+                  onPress={() => handleColorSelect(color)}
+                  className={`p-3 rounded-md border flex-row items-center ${
+                    selectedColor === color ? "bg-primary border-primary" : "border-gray-200"
+                  }`}
+                >
+                  <View
+                    className="w-4 h-4 rounded-full border border-gray-200"
+                    style={{ backgroundColor: color.toLowerCase() }}
+                  />
+                  <Text className={`ml-2 ${selectedColor === color ? "text-primary-foreground" : "text-foreground"}`}>
+                    {color}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
-        </View>
+        )}
 
         {/* Quantity Selection */}
         <View className="space-y-2">
@@ -183,5 +194,5 @@ export default function ProductDetail() {
         </View>
       </View>
     </ScrollView>
-  )
+  );
 }

@@ -41,6 +41,12 @@ export default function TabsLayout() {
               options={{
                 title: "Shopping Cart",
               }} />
+          <Tabs.Screen
+             name="cart/OrderList"
+            options={{
+              title: "Order List",
+            }}
+           />
         </Tabs>
       </View>
     </SafeAreaView>

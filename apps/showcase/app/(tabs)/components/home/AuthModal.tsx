@@ -1,11 +1,11 @@
 
 
-import { useState, memo, useEffect } from "react"
-import { View, Text, Image, TouchableOpacity, Modal, ScrollView, Platform, Alert } from "react-native"
-import { X } from "lucide-react-native"
-import { Button } from "~/components/ui/button"
-import { Input } from "~/components/ui/input"
-import { auth } from "~/app/services/firebaseConfig"
+import { useState, memo, useEffect } from "react";
+import { View, Text, Image, TouchableOpacity, Modal, ScrollView, Platform, Alert } from "react-native";
+import { X } from "lucide-react-native";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { auth } from "~/app/services/firebaseConfig";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -15,90 +15,90 @@ import {
   FacebookAuthProvider,
   onAuthStateChanged,
   type User,
-} from "firebase/auth"
+} from "firebase/auth";
 
 interface AuthModalProps {
-  isOpen: boolean
-  onClose: () => void
-  isDarkColorScheme: boolean
-  onAuthStateChange: (user: User | null) => void
+  isOpen: boolean;
+  onClose: () => void;
+  isDarkColorScheme: boolean;
+  onAuthStateChange: (user: User | null) => void;
 }
 
 function AuthModal({ isOpen, onClose, isDarkColorScheme, onAuthStateChange }: AuthModalProps) {
-  const [isLogin, setIsLogin] = useState(true)
-  const [isForgotPassword, setIsForgotPassword] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [firstName, setFirstName] = useState("")
-  const [lastName, setLastName] = useState("")
+  const [isLogin, setIsLogin] = useState(true);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
 
-  const textColor = isDarkColorScheme ? "#fff" : "#6B7280"
-  const backgroundColor = isDarkColorScheme ? "#1a1a1a" : "#fff"
+  const textColor = isDarkColorScheme ? "#fff" : "#6B7280";
+  const backgroundColor = isDarkColorScheme ? "#1a1a1a" : "#fff";
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      onAuthStateChange(user)
-    })
+      onAuthStateChange(user);
+    });
 
-    return () => unsubscribe()
-  }, [onAuthStateChange])
+    return () => unsubscribe();
+  }, [onAuthStateChange]);
 
   const handleSignUp = async () => {
     try {
-      await createUserWithEmailAndPassword(auth, email, password)
-      Alert.alert("Success", "User signed up successfully")
-      onClose()
+      await createUserWithEmailAndPassword(auth, email, password);
+      Alert.alert("Success", "User signed up successfully");
+      onClose();
     } catch (error) {
-      Alert.alert("Error", "Failed to sign up. Please try again.")
-      console.error("Error signing up:", error)
+      Alert.alert("Error", "Failed to sign up. Please try again.");
+      console.error("Error signing up:", error);
     }
-  }
+  };
 
   const handleLogin = async () => {
     try {
-      await signInWithEmailAndPassword(auth, email, password)
-      Alert.alert("Success", "User logged in successfully")
-      onClose()
+      await signInWithEmailAndPassword(auth, email, password);
+      Alert.alert("Success", "User logged in successfully");
+      onClose();
     } catch (error) {
-      Alert.alert("Error", "Failed to log in. Please check your credentials and try again.")
-      console.error("Error logging in:", error)
+      Alert.alert("Error", "Failed to log in. Please check your credentials and try again.");
+      console.error("Error logging in:", error);
     }
-  }
+  };
 
   const handleForgotPassword = async () => {
     try {
-      await sendPasswordResetEmail(auth, email)
-      Alert.alert("Success", "Password reset email sent")
-      setIsForgotPassword(false)
+      await sendPasswordResetEmail(auth, email);
+      Alert.alert("Success", "Password reset email sent");
+      setIsForgotPassword(false);
     } catch (error) {
-      Alert.alert("Error", "Failed to send password reset email. Please check your email and try again.")
-      console.error("Error sending password reset email:", error)
+      Alert.alert("Error", "Failed to send password reset email. Please check your email and try again.");
+      console.error("Error sending password reset email:", error);
     }
-  }
+  };
 
   const handleGoogleLogin = async () => {
-    const provider = new GoogleAuthProvider()
+    const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider)
-      Alert.alert("Success", "User logged in with Google successfully")
-      onClose()
+      await signInWithPopup(auth, provider);
+      Alert.alert("Success", "User logged in with Google successfully");
+      onClose();
     } catch (error) {
-      Alert.alert("Error", "Failed to log in with Google. Please try again.")
-      console.error("Error logging in with Google:", error)
+      Alert.alert("Error", "Failed to log in with Google. Please try again.");
+      console.error("Error logging in with Google:", error);
     }
-  }
+  };
 
   const handleFacebookLogin = async () => {
-    const provider = new FacebookAuthProvider()
+    const provider = new FacebookAuthProvider();
     try {
-      await signInWithPopup(auth, provider)
-      Alert.alert("Success", "User logged in with Facebook successfully")
-      onClose()
+      await signInWithPopup(auth, provider);
+      Alert.alert("Success", "User logged in with Facebook successfully");
+      onClose();
     } catch (error) {
-      Alert.alert("Error", "Failed to log in with Facebook. Please try again.")
-      console.error("Error logging in with Facebook:", error)
+      Alert.alert("Error", "Failed to log in with Facebook. Please try again.");
+      console.error("Error logging in with Facebook:", error);
     }
-  }
+  };
 
   return (
     <Modal visible={isOpen} animationType="fade" transparent={true} onRequestClose={onClose}>
@@ -261,9 +261,7 @@ function AuthModal({ isOpen, onClose, isDarkColorScheme, onAuthStateChange }: Au
         </ScrollView>
       </View>
     </Modal>
-  )
+  );
 }
 
-// Export the memoized version
-export default memo(AuthModal)
-
+export default memo(AuthModal);

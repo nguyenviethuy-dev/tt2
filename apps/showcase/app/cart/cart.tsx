@@ -120,7 +120,7 @@ export default function Cart() {
               source={{ uri: "https://upload.wikimedia.org/wikipedia/commons/a/a4/Paypal_2014_logo.png" }}
               className="w-16 h-12 mr-2"
             />
-            <Text className="text-lg text-blue-600">PayPal</Text>
+
           </Button>
           <Button variant="outline" className="flex-1 ml-2 py-15 flex-row justify-center items-center">
             <Image
@@ -129,7 +129,7 @@ export default function Cart() {
               }}
               className="w-16 h-6 mr-2"
             />
-            <Text className="text-lg text-blue-600">Google Pay</Text>
+
           </Button>
         </View>
 
