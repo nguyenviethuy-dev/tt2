@@ -1,4 +1,3 @@
-
 import { useRef, useEffect, useState } from "react";
 import { View, Text, ScrollView, SafeAreaView, Alert, TouchableOpacity } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -10,7 +9,6 @@ import { Separator } from "~/components/ui/separator";
 import { Plus, ArrowLeft } from "lucide-react-native";
 import { db, auth } from "~/app/services/firebaseConfig";
 import { collection, addDoc } from "firebase/firestore";
-import AuthModal from "../(tabs)/components/home/AuthModal"; // Đảm bảo đường dẫn đúng
 
 interface OrderItem {
   id: number;
@@ -34,6 +32,8 @@ interface OrderData {
   total: number;
   hasShippingProtection: boolean;
   uid?: string;
+  createdAt?: string;
+  id?: string;
 }
 
 export default function OrderReceipt() {
@@ -42,100 +42,56 @@ export default function OrderReceipt() {
   const viewShotRef = useRef(null);
   const [orderData, setOrderData] = useState<OrderData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [isAuthorized, setIsAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-
-  const sampleOrderData: OrderData = {
-    customerInfo: {
-      name: "John Doe",
-      email: "john.doe@example.com",
-      address: "123 Main St",
-      city: "New York",
-      country: "USA",
-      zipCode: "10001",
-    },
-    items: [
-      { id: 1, name: "T-Shirt", price: 19.99, quantity: 2, selectedSize: "M", selectedColor: "Blue" },
-      { id: 2, name: "Jeans", price: 49.99, quantity: 1 },
-    ],
-    total: 89.97,
-    hasShippingProtection: true,
-  };
-
-  const validateOrderData = (data: OrderData): boolean => {
-    const isValid =
-      data.customerInfo &&
-      typeof data.customerInfo.name === "string" &&
-      typeof data.customerInfo.email === "string" &&
-      typeof data.total === "number" &&
-      Array.isArray(data.items) &&
-      data.items.length > 0;
-    return isValid;
-  };
 
   useEffect(() => {
+    console.log("OrderReceipt mounted. Params received:", params);
+
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      console.log("Auth state:", user ? `UID: ${user.uid}, Email: ${user.email}` : "No user");
+      console.log("Auth state:", user ? `UID: ${user.uid}` : "No user");
 
       if (!user) {
-        setIsAuthModalOpen(true); // Mở modal nếu chưa đăng nhập
-        setIsAuthorized(false);
-        setIsLoading(false); // Đặt isLoading thành false để tránh vòng lặp
+        setError("You must be logged in to view this receipt.");
+        setIsLoading(false);
         return;
       }
 
-      setIsAuthorized(true);
-      setIsAuthModalOpen(false); // Đảm bảo modal đóng khi đã đăng nhập
-      try {
-        let parsedOrder: OrderData;
-        if (params.orderData) {
-          console.log("Raw params.orderData:", params.orderData);
-          parsedOrder = JSON.parse(params.orderData as string);
-        } else {
-          parsedOrder = sampleOrderData;
-          Alert.alert("Info", "Using sample order data.");
-        }
+      if (!params.orderData) {
+        setError("No order data provided in params.");
+        console.log("No orderData in params");
+        setIsLoading(false);
+        return;
+      }
 
-        const updatedOrderData = { ...parsedOrder, uid: user.uid };
-        console.log("Order data with UID:", updatedOrderData);
-        setOrderData(updatedOrderData);
+      try {
+        const parsedOrder = JSON.parse(params.orderData as string);
+        console.log("Parsed order data:", parsedOrder);
+        setOrderData(parsedOrder);
       } catch (error) {
         console.error("Parse error:", error);
-        setError(`Could not load order: ${error.message}`);
+        setError(`Could not parse order data: ${error.message}`);
       }
-      setIsLoading(false); // Hoàn tất quá trình tải
+      setIsLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      console.log("OrderReceipt unmounted");
+      unsubscribe();
+    };
   }, [params.orderData]);
 
   const saveOrderToFirestore = async (data: OrderData) => {
     const user = auth.currentUser;
-    console.log("Saving. User:", user ? user.uid : "No user");
-    console.log("User details:", user ? { uid: user.uid, email: user.email } : "No user");
+    if (!user || !data) return;
 
-    if (!user) {
-      setError("No authenticated user.");
-      return;
-    }
-
-    if (!validateOrderData(data)) {
-      setError("Invalid order data.");
-      return;
-    }
-
-    const orderPayload = { ...data, uid: user.uid, createdAt: new Date().toISOString() };
-    console.log("Payload to Firestore:", orderPayload);
-    console.log("UID check: Payload UID:", orderPayload.uid, "vs User UID:", user.uid);
-
+    const orderPayload = { ...data, uid: user.uid, createdAt: data.createdAt || new Date().toISOString() };
     try {
       const ordersCollection = collection(db, "orders");
       const docRef = await addDoc(ordersCollection, orderPayload);
       console.log("Saved with ID:", docRef.id);
       Alert.alert("Success", "Order saved!");
     } catch (error) {
-      console.error("Save error:", { message: error.message, code: error.code });
+      console.error("Save error:", error);
       setError(`Failed to save: ${error.message}`);
     }
   };
@@ -160,43 +116,36 @@ export default function OrderReceipt() {
     router.push("/");
   };
 
-  const handleAuthStateChange = (user: any) => {
-    setIsAuthorized(!!user);
-    if (user) {
-      setIsAuthModalOpen(false); // Đóng modal khi đăng nhập thành công
-    }
-  };
-
-  // Nếu chưa đăng nhập, chỉ hiển thị AuthModal
-  if (!isAuthorized) {
+  if (isLoading) {
     return (
-      <SafeAreaView className="flex-1 bg-background">
-        {isAuthModalOpen && (
-          <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)" }}>
-            <AuthModal
-              isOpen={isAuthModalOpen}
-              onClose={() => setIsAuthModalOpen(false)}
-              onAuthStateChange={handleAuthStateChange}
-              isDarkColorScheme={true}
-            />
-          </View>
-        )}
+      <SafeAreaView className="flex-1 justify-center items-center bg-background">
+        <Text>Loading receipt...</Text>
       </SafeAreaView>
     );
   }
 
-  // Nếu đang tải, hiển thị màn hình loading
-  if (isLoading) return <SafeAreaView className="flex-1 justify-center items-center bg-background"><Text>Loading...</Text></SafeAreaView>;
+  if (error) {
+    return (
+      <SafeAreaView className="flex-1 justify-center items-center bg-background">
+        <Text className="text-lg text-center mb-4">{error}</Text>
+        <Button onPress={() => router.push("/")} variant="default">
+          <Text className="text-white">Return Home</Text>
+        </Button>
+      </SafeAreaView>
+    );
+  }
 
-  // Nếu có lỗi, hiển thị thông báo lỗi
-  if (error) return (
-    <SafeAreaView className="flex-1 justify-center items-center bg-background">
-      <Text className="text-lg text-center mb-4">{error}</Text>
-      <Button onPress={() => router.push("/")} variant="default"><Text className="text-white">Return Home</Text></Button>
-    </SafeAreaView>
-  );
+  if (!orderData) {
+    return (
+      <SafeAreaView className="flex-1 justify-center items-center bg-background">
+        <Text className="text-lg text-center mb-4">No order data available</Text>
+        <Button onPress={() => router.back()} variant="outline">
+          <Text>Go Back</Text>
+        </Button>
+      </SafeAreaView>
+    );
+  }
 
-  // Nếu đã xác thực và có dữ liệu, hiển thị biên lai
   return (
     <SafeAreaView className="flex-1 bg-background">
       <View className="flex-row justify-between items-center p-4">
@@ -208,8 +157,12 @@ export default function OrderReceipt() {
         <ViewShot ref={viewShotRef} options={{ format: "jpg", quality: 0.9 }}>
           <Card>
             <CardHeader>
-              <CardTitle><Text className="text-2xl font-bold text-center dark:text-white">Order Receipt</Text></CardTitle>
-              <Text className="text-sm text-center text-gray-500">{new Date().toLocaleString()}</Text>
+              <CardTitle>
+                <Text className="text-2xl font-bold text-center dark:text-white">Order Receipt</Text>
+              </CardTitle>
+              <Text className="text-sm text-center text-gray-500">
+                {new Date(orderData.createdAt || Date.now()).toLocaleString()}
+              </Text>
             </CardHeader>
             <CardContent>
               <View className="space-y-6">
@@ -246,21 +199,24 @@ export default function OrderReceipt() {
         </ViewShot>
       </ScrollView>
       <View className="p-4 flex-row justify-between">
-        <Button className="flex-1 mr-2" onPress={async () => {
-          try {
-            const { status } = await MediaLibrary.requestPermissionsAsync();
-            if (status === "granted") {
-              const uri = await viewShotRef.current.capture();
-              await MediaLibrary.saveToLibraryAsync(uri);
-              Alert.alert("Success", "Receipt saved to gallery!");
-            } else {
-              Alert.alert("Permission Required", "We need permission to save the receipt to your gallery");
+        <Button
+          className="flex-1 mr-2"
+          onPress={async () => {
+            try {
+              const { status } = await MediaLibrary.requestPermissionsAsync();
+              if (status === "granted") {
+                const uri = await viewShotRef.current.capture();
+                await MediaLibrary.saveToLibraryAsync(uri);
+                Alert.alert("Success", "Receipt saved to gallery!");
+              } else {
+                Alert.alert("Permission Required", "We need permission to save the receipt to your gallery");
+              }
+            } catch (error) {
+              console.error("Error saving receipt:", error);
+              Alert.alert("Error", "Failed to save receipt. Please try again.");
             }
-          } catch (error) {
-            console.error("Error saving receipt:", error);
-            Alert.alert("Error", "Failed to save receipt. Please try again.");
-          }
-        }}>
+          }}
+        >
           <Text className="text-white dark:text-black text-md">Save Receipt</Text>
         </Button>
         <Button className="flex-1 ml-2" variant="default" onPress={handleBackToHome}>

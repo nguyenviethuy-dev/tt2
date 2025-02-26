@@ -1,4 +1,3 @@
-
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { type Theme, ThemeProvider, DefaultTheme, DarkTheme } from "@react-navigation/native";
 import { PortalHost } from "@rn-primitives/portal";
@@ -9,13 +8,10 @@ import * as React from "react";
 import { Platform, Text } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ThemeToggle } from "~/components/ThemeToggle";
-import AllReviewsScreen from "~/app/review/AllReviewsScreen";
 import { CartProvider } from "./cart/Contexts/cart-context";
 import { setAndroidNavigationBar } from "~/lib/android-navigation-bar";
 import { NAV_THEME } from "~/lib/constants";
 import { useColorScheme } from "~/lib/useColorScheme";
-import CustomerReviews from "~/app/review/customer-reviews";
-import OrderList from "./cart/OrderList"; // Import OrderList
 
 const { ToastProvider } = DeprecatedUi;
 
@@ -87,49 +83,18 @@ export default function RootLayout() {
                 headerRight: () => <ThemeToggle />,
               }}
             >
-              <Stack.Screen
-                name="(tabs)"
-                options={{
-                  headerShown: false,
-                }}
-              />
-              <Stack.Screen
-                name="productPage"
-                options={{
-                  // title: "New Arrivals",
-                }}
-              />
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="productPage" options={{}} />
               <Stack.Screen name="productDetail" options={{ title: "Product Detail" }} />
-              <Stack.Screen
-                name="cart"
-                options={{
-                  // title: "Shopping Cart",
-                }}
-              />
-              <Stack.Screen
-                name="cart/Checkout"
-                options={{
-                  // title: "Checkout",
-                  presentation: "modal",
-                }}
-              />
+              <Stack.Screen name="cart" options={{}} />
+              <Stack.Screen name="cart/Checkout" options={{ presentation: "modal" }} />
               <Stack.Screen
                 name="cart/OrderReceipt"
-                options={{
-                  // title: "Order Receipt",
-                  presentation: "modal",
-                  headerBackVisible: false,
-                }}
+                options={{ presentation: "modal", headerBackVisible: false }}
               />
               <Stack.Screen name="AllReviews" options={{ title: "All Reviews" }} />
               <Stack.Screen name="AddReview" options={{ title: "Add Review" }} />
-              {/* Thêm Stack.Screen cho OrderList */}
-              <Stack.Screen
-                name="cart/OrderList"
-                options={{
-                  title: "Order List",
-                }}
-              />
+              <Stack.Screen name="cart/OrderList" options={{ title: "Order List" }} />
             </Stack>
           </BottomSheetModalProvider>
           <PortalHost />

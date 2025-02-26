@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { View, Text, ScrollView, SafeAreaView, Alert, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { db, auth } from "~/app/services/firebaseConfig";
-import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore"; // Thêm deleteDoc và doc
+import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
-import { Trash2, RefreshCw } from "lucide-react-native"; // Thêm icon Trash và Refresh
+import { Trash2, RefreshCw } from "lucide-react-native";
 
 interface OrderItem {
   id: number;
@@ -49,7 +49,7 @@ export default function OrderList() {
     }
 
     try {
-      setLoading(true); // Bật loading khi làm mới
+      setLoading(true);
       const ordersCollection = collection(db, "orders");
       const q = query(ordersCollection, where("uid", "==", user.uid));
       const querySnapshot = await getDocs(q);
@@ -72,8 +72,9 @@ export default function OrderList() {
   }, []);
 
   const handleViewReceipt = (order: OrderData) => {
+    // console.log("handleViewReceipt called with order:", order);
     router.push({
-      pathname: "/OrderReceipt",
+      pathname: "/cart/OrderReceipt", // Sửa thành /cart/OrderReceipt để khớp với RootLayout.tsx
       params: { orderData: JSON.stringify(order) },
     });
   };
@@ -96,7 +97,7 @@ export default function OrderList() {
             try {
               const orderRef = doc(db, "orders", orderId);
               await deleteDoc(orderRef);
-              setOrders(orders.filter((order) => order.id !== orderId)); // Cập nhật UI ngay lập tức
+              setOrders(orders.filter((order) => order.id !== orderId));
               Alert.alert("Success", "Order deleted successfully!");
             } catch (error) {
               console.error("Error deleting order:", error);
@@ -109,7 +110,7 @@ export default function OrderList() {
   };
 
   const handleRefresh = () => {
-    fetchOrders(); // Gọi lại hàm tải danh sách đơn hàng
+    fetchOrders();
   };
 
   if (loading) {
@@ -144,38 +145,42 @@ export default function OrderList() {
           <Text className="text-lg text-center dark:text-white">You have no orders yet.</Text>
         ) : (
           orders.map((order, index) => (
-            <TouchableOpacity key={order.id || index} onPress={() => handleViewReceipt(order)}>
-              <Card className="mb-4">
-                <CardHeader>
-                  <CardTitle>
-                    <Text className="text-lg font-semibold dark:text-white">
-                      Order #{index + 1} - {new Date(order.createdAt).toLocaleDateString()}
-                    </Text>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <View className="space-y-4">
-                    <Text className="dark:text-white">Customer: {order.customerInfo.name}</Text>
-                    <Text className="dark:text-white">Total: ${order.total.toFixed(2)}</Text>
-                    <Text className="dark:text-white">Items: {order.items.length}</Text>
-                    <Separator />
-                    <View className="flex-row justify-between">
-                      <Button variant="outline" onPress={() => handleViewReceipt(order)}>
-                        <Text className="dark:text-white">View Receipt</Text>
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        onPress={() => handleDeleteOrder(order.id)}
-                        className="flex-row items-center"
-                      >
-                        <Trash2 size={18} color="#fff" className="mr-2" />
-                        <Text className="text-white">Delete</Text>
-                      </Button>
-                    </View>
+            <Card key={order.id || index} className="mb-4">
+              <CardHeader>
+                <CardTitle>
+                  <Text className="text-lg font-semibold dark:text-white">
+                    Order #{index + 1} - {new Date(order.createdAt).toLocaleDateString()}
+                  </Text>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <View className="space-y-4">
+                  <Text className="dark:text-white">Customer: {order.customerInfo.name}</Text>
+                  <Text className="dark:text-white">Total: ${order.total.toFixed(2)}</Text>
+                  <Text className="dark:text-white">Items: {order.items.length}</Text>
+                  <Separator />
+                  <View className="flex-row justify-between">
+                    <Button
+                      variant="outline"
+                      onPress={() => {
+                        // console.log("View Receipt button pressed for order:", order);
+                        handleViewReceipt(order);
+                      }}
+                    >
+                      <Text className="dark:text-white">View Receipt</Text>
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onPress={() => handleDeleteOrder(order.id)}
+                      className="flex-row items-center"
+                    >
+                      <Trash2 size={18} color="#fff" className="mr-2" />
+                      <Text className="text-white">Delete</Text>
+                    </Button>
                   </View>
-                </CardContent>
-              </Card>
-            </TouchableOpacity>
+                </View>
+              </CardContent>
+            </Card>
           ))
         )}
       </ScrollView>
