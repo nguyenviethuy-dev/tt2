@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
 import { Plus, ArrowLeft } from "lucide-react-native";
 import { db, auth } from "~/app/services/firebaseConfig";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, where, doc } from "firebase/firestore"; // Thêm getDocs và query
 
 interface OrderItem {
   id: number;
@@ -45,10 +45,10 @@ export default function OrderReceipt() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    console.log("OrderReceipt mounted. Params received:", params);
+    // console.log("OrderReceipt mounted. Params received:", params);
 
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      console.log("Auth state:", user ? `UID: ${user.uid}` : "No user");
+      // console.log("Auth state:", user ? `UID: ${user.uid}` : "No user");
 
       if (!user) {
         setError("You must be logged in to view this receipt.");
@@ -58,14 +58,14 @@ export default function OrderReceipt() {
 
       if (!params.orderData) {
         setError("No order data provided in params.");
-        console.log("No orderData in params");
+        // console.log("No orderData in params");
         setIsLoading(false);
         return;
       }
 
       try {
         const parsedOrder = JSON.parse(params.orderData as string);
-        console.log("Parsed order data:", parsedOrder);
+        // console.log("Parsed order data:", parsedOrder);
         setOrderData(parsedOrder);
       } catch (error) {
         console.error("Parse error:", error);
@@ -75,7 +75,7 @@ export default function OrderReceipt() {
     });
 
     return () => {
-      console.log("OrderReceipt unmounted");
+      // console.log("OrderReceipt unmounted");
       unsubscribe();
     };
   }, [params.orderData]);
@@ -84,15 +84,25 @@ export default function OrderReceipt() {
     const user = auth.currentUser;
     if (!user || !data) return;
 
-    const orderPayload = { ...data, uid: user.uid, createdAt: data.createdAt || new Date().toISOString() };
+    // Kiểm tra xem đơn hàng đã tồn tại trong Firestore chưa (dựa trên id hoặc createdAt)
     try {
       const ordersCollection = collection(db, "orders");
+      const q = query(ordersCollection, where("id", "==", data.id)); // Giả sử orderData có id
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        // console.log("Order already exists in Firestore, skipping save.");
+        return; // Không lưu nếu đã tồn tại
+      }
+
+      const orderPayload = { ...data, uid: user.uid, createdAt: data.createdAt || new Date().toISOString() };
       const docRef = await addDoc(ordersCollection, orderPayload);
-      console.log("Saved with ID:", docRef.id);
-      Alert.alert("Success", "Order saved!");
+      // console.log("Saved with ID:", docRef.id);
+      Alert.alert("Success", "Order saved successfully!");
     } catch (error) {
       console.error("Save error:", error);
       setError(`Failed to save: ${error.message}`);
+      Alert.alert("Error", "Failed to save order.");
     }
   };
 
@@ -105,15 +115,15 @@ export default function OrderReceipt() {
     }
   };
 
-  const handleBackToPrevious = () => {
-    router.back();
+  const handleBackToPrevious = async () => {
+    router.back(); // Quay lại sau khi kiểm tra/lưu
   };
 
-  const handleBackToHome = () => {
+  const handleBackToHome = async () => {
     if (orderData) {
-      saveOrderToFirestore(orderData);
+      await saveOrderToFirestore(orderData); // Kiểm tra và lưu nếu chưa tồn tại
     }
-    router.push("/");
+    router.push("/"); // Quay về trang chủ sau khi kiểm tra/lưu
   };
 
   if (isLoading) {
