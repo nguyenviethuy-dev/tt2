@@ -2,12 +2,12 @@
 
 import { ScrollView } from "react-native"
 import { useTheme } from "@react-navigation/native"
-import BannerSection from "./components/home/banner"
-import ProductsSection from "./components/home/products"
-import ProductsTrending from "./components/home/products-trending"
-import ProductsNewArrivals from "./components/home/products-new-arrivals"
-import GiftForReceptions from "./components/home/gift-for-receptions"
-import VideoTutorial from "./components/home/video-tutorial"
+import BannerSection from "../home/banner"
+import ProductsSection from "../home/products"
+import ProductsTrending from "../home/products-trending"
+import ProductsNewArrivals from "../home/products-new-arrivals"
+import GiftForReceptions from "../home/gift-for-receptions"
+import VideoTutorial from "../home/video-tutorial"
 import CustomerReviews from "../review/customer-reviews"
 import Footer from "./components/footer"
 

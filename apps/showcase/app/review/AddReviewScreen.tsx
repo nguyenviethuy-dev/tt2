@@ -24,7 +24,7 @@ import { auth, db } from "~/app/services/firebaseConfig1";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { collection, query, where, getDocs, addDoc } from "firebase/firestore";
 import axios from "axios";
-import AuthModal from "../(tabs)/components/home/AuthModal";
+import AuthModal from "../home/AuthModal";
 
 // Định nghĩa kiểu cho phản hồi từ Cloudinary API
 type CloudinaryResponse = {

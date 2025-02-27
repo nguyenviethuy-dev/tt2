@@ -2,7 +2,7 @@
 
 import { useState, memo, useCallback, useEffect } from "react";
 import { useRouter } from "expo-router";
-import AuthModal from "./home/AuthModal";
+import AuthModal from "../../home/AuthModal";
 import { View, Text, TouchableOpacity, Image, ScrollView, Platform, Alert } from "react-native";
 import { User, ShoppingCart, ChevronDown, TrendingUp, Sparkles, Settings, LogOut } from "lucide-react-native";
 import Icon from "react-native-vector-icons/AntDesign";
