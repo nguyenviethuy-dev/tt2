@@ -195,7 +195,7 @@
 import { useEffect, useState } from "react";
 import { View, Text, ScrollView, SafeAreaView, Alert, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
-import { db, auth } from "~/app/services/firebaseConfig";
+import { db, auth } from "~/app/services/firebaseConfig1";
 import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -292,7 +292,6 @@ export default function OrderList() {
               const orderRef = doc(db, "orders", orderId);
               await deleteDoc(orderRef);
               setOrders(orders.filter((order) => order.id !== orderId));
-              Alert.alert("Success", "Order deleted successfully!");
             } catch (error) {
               console.error("Error deleting order:", error);
               Alert.alert("Error", "Failed to delete order.");

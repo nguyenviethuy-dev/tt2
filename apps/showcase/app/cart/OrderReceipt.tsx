@@ -248,8 +248,8 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Separator } from "~/components/ui/separator";
 import { Plus, ArrowLeft } from "lucide-react-native";
-import { db, auth } from "~/app/services/firebaseConfig";
-import { collection, addDoc, getDocs, query, where, doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { db, auth } from "~/app/services/firebaseConfig1";
+import { collection, addDoc, updateDoc, doc, serverTimestamp } from "firebase/firestore";
 
 interface OrderItem {
   id: number;
@@ -273,7 +273,7 @@ interface OrderData {
   total: number;
   hasShippingProtection: boolean;
   uid: string;
-  createdAt?: string | any; // Cho phép serverTimestamp
+  createdAt?: string | any;
   id?: string; // id không bắt buộc
 }
 
@@ -307,10 +307,9 @@ export default function OrderReceipt() {
       try {
         const parsedOrder = JSON.parse(params.orderData as string);
         console.log("Parsed order data before enrichment:", parsedOrder);
-        // Đảm bảo bổ sung uid nếu thiếu
         const enrichedOrder = {
           ...parsedOrder,
-          uid: parsedOrder.uid || (user ? user.uid : undefined),
+          uid: parsedOrder.uid || user.uid,
           createdAt: parsedOrder.createdAt || serverTimestamp(),
         };
         console.log("Enriched parsed order data:", enrichedOrder);
@@ -340,27 +339,23 @@ export default function OrderReceipt() {
 
     try {
       const ordersCollection = collection(db, "orders");
-      const q = query(ordersCollection, where("id", "==", data.id));
-      const querySnapshot = await getDocs(q);
+      const orderPayload = {
+        ...data,
+        uid: user.uid,
+        createdAt: data.createdAt || serverTimestamp(),
+      };
 
-      if (data.id && !querySnapshot.empty) {
-        // Nếu id tồn tại và có tài liệu khớp, cập nhật
-        const existingDoc = querySnapshot.docs[0];
-        await updateDoc(doc(ordersCollection, existingDoc.id), {
-          ...data,
-          uid: user.uid,
-          createdAt: data.createdAt || serverTimestamp(),
-        });
-        console.log("Order updated with ID:", existingDoc.id);
+      if (data.id) {
+        // Nếu có id (từ OrderList), cập nhật document hiện có
+        const orderRef = doc(db, "orders", data.id);
+        await updateDoc(orderRef, orderPayload);
+        console.log("Order updated with ID:", data.id);
       } else {
-        // Nếu id thiếu hoặc không khớp, tạo mới
-        const orderPayload = {
-          ...data,
-          uid: user.uid,
-          createdAt: serverTimestamp(),
-        };
+        // Nếu không có id, tạo mới document
         const docRef = await addDoc(ordersCollection, orderPayload);
-        console.log("Saved with new ID:", docRef.id);
+        console.log("Order saved with new ID:", docRef.id);
+        // Cập nhật orderData với id mới
+        setOrderData((prev) => (prev ? { ...prev, id: docRef.id } : null));
       }
     } catch (error) {
       console.error("Save error details:", {
@@ -384,16 +379,16 @@ export default function OrderReceipt() {
 
   const handleBackToPrevious = async () => {
     if (orderData) {
-      await saveOrderToFirestore(orderData); // Cập nhật hoặc tạo mới
+      await saveOrderToFirestore(orderData);
     }
-    router.back(); // Quay lại sau khi xử lý
+    router.back();
   };
 
   const handleBackToHome = async () => {
     if (orderData) {
-      await saveOrderToFirestore(orderData); // Cập nhật hoặc tạo mới
+      await saveOrderToFirestore(orderData);
     }
-    router.push("/"); // Quay về trang chủ sau khi xử lý
+    router.push("/");
   };
 
   if (isLoading) {
@@ -488,6 +483,7 @@ export default function OrderReceipt() {
               if (status === "granted") {
                 const uri = await viewShotRef.current.capture();
                 await MediaLibrary.saveToLibraryAsync(uri);
+                Alert.alert("Success", "Receipt saved to gallery!");
               } else {
                 Alert.alert("Permission Required", "We need permission to save the receipt to your gallery");
               }

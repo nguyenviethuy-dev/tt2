@@ -5,7 +5,7 @@ import { View, Text, Image, TouchableOpacity, Modal, ScrollView, Platform, Alert
 import { X } from "lucide-react-native";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { auth } from "~/app/services/firebaseConfig";
+import { auth } from "~/app/services/firebaseConfig1";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,

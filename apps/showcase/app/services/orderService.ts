@@ -1,4 +1,4 @@
-import { db, auth } from "./firebaseConfig"
+import { db, auth } from "./firebaseConfig1"
 import { collection, addDoc, doc, getDoc } from "firebase/firestore"
 
 export const saveOrder = async (orderData) => {

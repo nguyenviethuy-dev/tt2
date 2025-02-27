@@ -13,7 +13,7 @@ import { useColorScheme } from "~/lib/useColorScheme";
 import { useCart } from "~/app/cart/Contexts/cart-context";
 import products from "~/app/product-scr/data/products";
 import SearchResults from "./SearchResults";
-import { auth } from "~/app/services/firebaseConfig";
+import { auth } from "~/app/services/firebaseConfig1";
 import { type User as FirebaseUser, signOut } from "firebase/auth";
 
 const Header = memo(() => {
