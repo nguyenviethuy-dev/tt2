@@ -1,40 +1,41 @@
 
-
-import { useState } from "react"
-import { View, Text, Image, ScrollView, TouchableOpacity, Dimensions } from "react-native"
-import { Star, ChevronLeft, ChevronRight, Plus } from "lucide-react-native"
-import { useColorScheme } from "~/lib/useColorScheme"
-import { router } from "expo-router"
-import ReviewDetailModal from "~/app/review/ReviewDetailModal"
+import { useState, useEffect } from "react";
+import { View, Text, Image, ScrollView, TouchableOpacity, Dimensions } from "react-native";
+import { Star, ChevronLeft, ChevronRight, Plus } from "lucide-react-native";
+import { useColorScheme } from "~/lib/useColorScheme";
+import { router } from "expo-router";
+import ReviewDetailModal from "~/app/review/ReviewDetailModal";
+import { db } from "~/app/services/firebaseConfig1"; // Đảm bảo đường dẫn đúng
+import { collection, getDocs } from "firebase/firestore";
 
 interface Review {
-  id: number
-  image: string
-  name: string
-  rating: number
-  text: string
-  date: string
+  id: string;
+  image: string;
+  name: string;
+  rating: number;
+  text: string;
+  date: string;
 }
 
-const reviews: Review[] = [
+const staticReviews: Review[] = [
   {
-    id: 1,
+    id: "1",
     image: "https://s3.evgcloud.net/xboostproductreviews/40278524065/20241128/75e5b9e1-f7b2-4579-b641-933f183102ab.jpg",
     name: "Bengfort Shelli",
     rating: 5,
     text: "Absolutely beautiful. Got it framed and hung for everyone to see. I love it !!!",
-    date: "2024-01-28"
+    date: "2024-01-28",
   },
   {
-    id: 2,
+    id: "2",
     image: "https://s3.evgcloud.net/xboostproductreviews/40278524065/20241127/0d6aa033-a7a2-4c3e-a7cd-5d1775fa65fc.jpg",
     name: "Rios Nidya D",
     rating: 5,
-    text: "This item was purchased as a Christmas gift for my daughter -in-law, son and family! Their names start with the letter 'A'. Loved...",
-    date: "2024-01-27"
+    text: "This item was purchased as a Christmas gift for my daughter-in-law, son and family! Their names start with the letter 'A'. Loved...",
+    date: "2024-01-27",
   },
   {
-    id: 3,
+    id: "3",
     image: "https://s3.evgcloud.net/xboostproductreviews/40278524065/20241123/839a4215-23ea-4d48-8772-f9a46a3503cc.jpg",
     name: "Athorn Carolynn",
     rating: 5,
@@ -42,7 +43,7 @@ const reviews: Review[] = [
     date: "2024-01-23",
   },
   {
-    id: 4,
+    id: "4",
     image: "https://s3.evgcloud.net/xboostproductreviews/40278524065/20241122/e4ae1b23-3564-4f62-b55a-eb21080ab978.jpg",
     name: "Curnutte Kelly",
     rating: 5,
@@ -50,7 +51,7 @@ const reviews: Review[] = [
     date: "2024-01-22",
   },
   {
-    id: 5,
+    id: "5",
     image: "https://s3.evgcloud.net/xboostproductreviews/40278524065/20240930/9678e95b-3b7f-470c-8e39-2f5ac556214a.jpg",
     name: "John Smith",
     rating: 5,
@@ -58,45 +59,72 @@ const reviews: Review[] = [
     date: "2024-01-20",
   },
   {
-    id: 6,
+    id: "6",
     image: "https://s3.evgcloud.net/xboostproductreviews/40278524065/20240930/9678e95b-3b7f-470c-8e39-2f5ac556214a.jpg",
     name: "Jane Doe",
     rating: 5,
     text: "Beautiful craftsmanship and quick delivery!",
     date: "2024-01-19",
-    
   },
   {
-    id: 7,
+    id: "7",
     image: "https://s3.evgcloud.net/xboostproductreviews/40278524065/20240930/9678e95b-3b7f-470c-8e39-2f5ac556214a.jpg",
     name: "Jane Doe",
     rating: 5,
     text: "Beautiful craftsmanship and quick delivery!",
     date: "2024-01-19",
   },
-  // ... (add more reviews)
-]
+];
 
 export default function CustomerReviews() {
-  const [startIndex, setStartIndex] = useState(0)
-  const [detailModalVisible, setDetailModalVisible] = useState(false)
-  const [selectedReview, setSelectedReview] = useState<Review | null>(null)
-  const { isDarkColorScheme } = useColorScheme()
-  const windowWidth = Dimensions.get("window").width
-  const itemsPerScreen = Math.floor(windowWidth / 300)
+  const [startIndex, setStartIndex] = useState(0);
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [selectedReview, setSelectedReview] = useState<Review | null>(null);
+  const [allReviews, setAllReviews] = useState<Review[]>(staticReviews); // Khởi tạo với dữ liệu cứng
+  const { isDarkColorScheme } = useColorScheme();
+  const windowWidth = Dimensions.get("window").width;
+  const itemsPerScreen = Math.floor(windowWidth / 300);
+
+  // Lấy dữ liệu từ Firestore khi component mount
+  useEffect(() => {
+    const fetchReviewsFromFirestore = async () => {
+      try {
+        const reviewsCollection = collection(db, "reviews");
+        const querySnapshot = await getDocs(reviewsCollection);
+        const firestoreReviews: Review[] = querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id, // Chuỗi từ Firestore
+            image: (data.image as string) || "default_image_url",
+            name: (data.name as string) || "Anonymous",
+            rating: (data.rating as number) || 0,
+            text: (data.text as string) || "No review text",
+            date: (data.date as string) || new Date().toISOString(),
+          };
+        });
+        // Kết hợp dữ liệu cứng với dữ liệu từ Firestore
+        const combinedReviews = [...staticReviews, ...firestoreReviews];
+        setAllReviews(combinedReviews);
+      } catch (error) {
+        console.error("Error fetching reviews from Firestore:", error);
+      }
+    };
+
+    fetchReviewsFromFirestore();
+  }, []);
 
   const handlePrevious = () => {
-    setStartIndex((prev) => Math.max(0, prev - 1))
-  }
+    setStartIndex((prev) => Math.max(0, prev - 1));
+  };
 
   const handleNext = () => {
-    setStartIndex((prev) => Math.min(reviews.length - itemsPerScreen, prev + 1))
-  }
+    setStartIndex((prev) => Math.min(allReviews.length - itemsPerScreen, prev + 1));
+  };
 
   const openDetailModal = (review: Review) => {
-    setSelectedReview(review)
-    setDetailModalVisible(true)
-  }
+    setSelectedReview(review);
+    setDetailModalVisible(true);
+  };
 
   return (
     <View className={`flex-1 px-4 py-8 ${isDarkColorScheme ? "bg-gray-900" : "bg-gray-50"}`}>
@@ -122,7 +150,7 @@ export default function CustomerReviews() {
             paddingHorizontal: 16,
           }}
         >
-          {reviews.slice(startIndex, startIndex + itemsPerScreen).map((review) => (
+          {allReviews.slice(startIndex, startIndex + itemsPerScreen).map((review) => (
             <TouchableOpacity key={review.id} onPress={() => openDetailModal(review)}>
               <View
                 className={`w-[300px] rounded-lg shadow-md overflow-hidden ${isDarkColorScheme ? "bg-gray-800" : "bg-white"}`}
@@ -142,7 +170,11 @@ export default function CustomerReviews() {
                     <View className="bg-black/30 py-2">
                       <View className="flex-row justify-center items-center gap-1">
                         {Array.from({ length: 5 }).map((_, i) => (
-                          <Star key={i} size={16} className="text-yellow-400 fill-yellow-400" />
+                          <Star
+                            key={i}
+                            size={16}
+                            className={i < review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-400"}
+                          />
                         ))}
                       </View>
                     </View>
@@ -186,7 +218,7 @@ export default function CustomerReviews() {
             </TouchableOpacity>
           )}
 
-          {startIndex < reviews.length - itemsPerScreen && (
+          {startIndex < allReviews.length - itemsPerScreen && (
             <TouchableOpacity
               onPress={handleNext}
               className={`ml-auto rounded-full p-2 ${isDarkColorScheme ? "bg-gray-800" : "bg-white"}`}
@@ -205,7 +237,7 @@ export default function CustomerReviews() {
 
         {/* Pagination Dots */}
         <View className="flex-row justify-center mt-6 space-x-2">
-          {reviews.map((_, index) => (
+          {allReviews.map((_, index) => (
             <View
               key={index}
               className={`h-2 rounded-full ${
@@ -228,11 +260,10 @@ export default function CustomerReviews() {
       {/* Add Review Button */}
       <TouchableOpacity
         className={`absolute bottom-8 left-8 rounded-full p-4 ${isDarkColorScheme ? "bg-blue-600" : "bg-blue-500"}`}
-        onPress={() =>  router.push("/review/AddReviewScreen")}
+        onPress={() => router.push("/review/AddReviewScreen")}
       >
         <Plus size={24} color="#fff" />
       </TouchableOpacity>
     </View>
-  )
+  );
 }
-
